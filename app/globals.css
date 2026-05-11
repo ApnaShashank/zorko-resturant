@@ -62,9 +62,19 @@ body {
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-bottom: 2px solid var(--border);
-  transition: all 0.3s;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
 }
-.top-nav.scrolled { padding: 14px 40px; background: rgba(255,253,249,0.98); box-shadow: 0 4px 24px rgba(238,127,26,0.12); }
+.top-nav.scrolled { 
+  padding: 14px 40px; 
+  background: rgba(255,253,249,0.98); 
+  box-shadow: 0 4px 24px rgba(238,127,26,0.12); 
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
 .top-nav.scrolled .logo-img { height: 42px; }
 .logo {
   display: flex; align-items: center; gap: 10px;
@@ -135,7 +145,7 @@ body {
   padding: 16px 20px 4px;
   background: var(--cream);
   position: relative; z-index: 100;
-  margin-top: 72px; /* Account for nav */
+  margin-top: 0; /* Nav hidden initially */
 }
 .welcome-img {
   width: 400px; max-width: 85vw; height: auto;
@@ -579,7 +589,10 @@ section { padding: 80px 0; }
 }
 .location-detail .icon svg { width: 20px; height: 20px; }
 .location-detail h4 { font-size: 13px; font-weight: 800; margin-bottom: 4px; color: var(--secondary); font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; }
-.location-detail p { font-size: 13px; color: var(--text-soft); line-height: 1.6; }
+.location-detail p { 
+  font-size: 15px; color: var(--text-soft); line-height: 1.6; 
+  overflow-wrap: break-word; word-break: break-word;
+}
 
 /* ── CTA Section ── */
 .cta-section {
@@ -677,7 +690,10 @@ footer {
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
-  .top-nav { padding: 12px 16px; }
+  .location-grid { padding: 20px; gap: 24px; border-radius: 24px; }
+  .location-detail { gap: 12px; }
+  .location-detail p { font-size: 13px; }
+  .top-nav, .top-nav.scrolled { padding: 12px 16px; }
   .logo { font-size: 16px; gap: 8px; }
   .logo-img { height: 38px; }
   .logo-text .brand { font-size: 16px; }
@@ -690,14 +706,20 @@ footer {
   .student-card { padding: 48px 24px; }
   /* Fixed bottom nav on mobile */
   .action-bar {
-    position: fixed; bottom: 16px; top: auto; left: 12px; right: 12px;
-    max-width: calc(100% - 24px); margin: 0;
-    border-radius: 24px;
-    padding: 6px 4px;
-    box-shadow: 0 8px 32px rgba(238,127,26,0.2);
-    background: rgba(255,253,249,0.98);
-    border: 2px solid var(--border);
-    justify-content: space-around;
+    position: fixed; bottom: 16px; top: auto; left: 10px; right: 10px;
+    width: calc(100% - 20px);
+    max-width: 500px; margin: 0 auto;
+    border-radius: 20px;
+    padding: 4px;
+    box-shadow: 0 10px 40px rgba(238,127,26,0.25);
+    background: rgba(255,253,249,0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1.5px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2px;
   }
   .nav-arrow { 
     display: flex; 
@@ -715,13 +737,21 @@ footer {
   .menu-addons { padding: 20px; }
   .addons-grid { grid-template-columns: 1fr; }
   .action-btn {
-  .action-btn svg { width: 20px; height: 20px; }
+    padding: 10px 4px;
+    font-size: 11px;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    justify-content: center;
+    border-radius: 14px;
+  }
+  .action-btn svg { width: 18px; height: 18px; }
   /* Add bottom space so last content not hidden behind fixed nav */
   body { padding-bottom: 90px; }
   .hero h1 { letter-spacing: -0.5px; }
 }
 @media (max-width: 600px) {
-  .top-nav { padding: 10px 14px; }
+  .top-nav, .top-nav.scrolled { padding: 10px 14px; }
   .logo-img { height: 36px; }
   .logo-text .brand { font-size: 15px; }
   .logo-text .sub { display: block; font-size: 8px; letter-spacing: 0.5px; }
