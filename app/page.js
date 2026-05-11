@@ -4,117 +4,217 @@ import { useState, useEffect, useRef } from 'react';
 
 // ─── Menu Data ───
 const menuData = {
-  burgers: [
-    { name: 'Mexican King Burger', desc: 'Premium spicy burger', price: '₹89', best: true },
-    { name: 'Spicy Salsa Barbeque Burger', desc: 'Smoky & spicy', price: '₹79', best: false },
-    { name: 'Korean Burger 🌶️', desc: 'Spicy Korean style', price: '₹69', best: false },
-    { name: 'Double Tikki Burger', desc: 'Two patties, extra filling', price: '₹79', best: false },
-    { name: 'Classic OG Burger', desc: 'The original taste', price: '₹49', best: false },
-    { name: 'Royal Paneer Grilled Burger', desc: 'Fresh grilled paneer', price: '₹139', best: false },
-  ],
-  fries: [
-    { name: 'Peri Peri French Fries', desc: 'Spicy peri peri seasoning', price: '₹99', best: false },
-    { name: 'Salted French Fries', desc: 'Classic salted fries', price: '₹79', best: false },
-    { name: 'Korean Cheesy Fries', desc: 'Cheese & Korean spices', price: '₹149', best: false },
-    { name: 'Sizzling Italian Fries', desc: 'Herbs & cheese', price: '₹159', best: false },
-  ],
-  wraps: [
-    { name: 'Mexican Salsa Wrap', desc: 'Spicy salsa & veggies', price: '₹129', best: false },
-    { name: 'Classic Veg Wrap', desc: 'Fresh garden wrap', price: '₹109', best: false },
-    { name: 'Grilled Paneer Wrap', desc: 'Char-grilled paneer', price: '₹149', best: true },
-  ],
-  pizza: [
-    { name: 'Veg Exotica Pizza', desc: 'Loaded with exotic veggies', price: '₹159', best: true },
-    { name: 'Paneer Barbeque Pizza', desc: 'Paneer & BBQ sauce', price: '₹189', best: false },
-    { name: 'Hot To Hell Pizza 🌶️', desc: 'Extremely spicy', price: '₹149', best: false },
-    { name: 'Pizza Di Sicilia', desc: 'Sicilian style herbs', price: '₹129', best: false },
-    { name: 'Margherita Pizza', desc: 'Classic cheese & tomato', price: '₹99', best: false },
-    { name: 'The Xplod (Cheese Burst)', desc: 'Liquid cheese explosion', price: '₹169', best: false },
-    { name: 'Golden Harvest Pizza', desc: 'Sweet corn & pineapple', price: '₹109', best: false },
-    { name: 'Four Cheese Pizza', desc: 'Mozzarella, Cheddar, Processed, Gouda', price: '₹169', best: false },
-    { name: 'Korean Pizza', desc: 'Korean fusion flavors', price: '₹159', best: false },
-  ],
-  momos: [
-    { name: 'Steam Momos', desc: 'Classic steamed dumplings', price: '₹89', best: false },
-    { name: 'Fried Momos', desc: 'Crispy fried dumplings', price: '₹89', best: false },
-    { name: 'Cheese Melting Gravy Momos', desc: 'Drowned in cheese gravy', price: '₹159', best: true },
-  ],
-  kulhad: [
-    { name: 'Cheese Volcano Kulhad Momos', desc: 'Hot & cheesy momos', price: '₹149', best: false },
-    { name: 'Cheese Loaded Kulhad Pizza', desc: 'Pizza served in a clay pot', price: '₹149', best: false },
-    { name: 'Cheese Chatori Kulhad Maggi', desc: 'Masala maggi with extra cheese', price: '₹149', best: true },
-  ],
-  sandwich: [
-    { name: 'Veg Mexican Sandwich', desc: 'Spicy salsa filling', price: '₹139', best: false },
-    { name: 'Paneer Maharaja Sandwich', desc: 'King size paneer layers', price: '₹149', best: false },
-    { name: 'Veggie Mumbai Grilled Sandwich', desc: 'Classic street style', price: '₹109', best: false },
-    { name: 'Cheese Chilli Sandwich', desc: 'Hot & cheesy', price: '₹129', best: true },
-  ],
-  pasta: [
-    { name: 'Alfredo Pasta', desc: 'Creamy white sauce (Reg/Baked)', price: '₹139/₹169', best: false },
-    { name: 'Arrabbiata Pasta', desc: 'Spicy red sauce (Reg/Baked)', price: '₹139/₹169', best: false },
-    { name: 'Ala Rosey Pasta', desc: 'Pink sauce mix (Reg/Baked)', price: '₹139/₹169', best: true },
-    { name: 'Peri Peri Pasta', desc: 'Spicy peri peri sauce (Reg/Baked)', price: '₹139/₹169', best: false },
-  ],
-  'garlic-bread': [
-    { name: 'Cheese Garlic Bread', desc: 'Classic cheesy bread', price: '₹89', best: false },
-    { name: 'Supreme Treat Garlic Bread', desc: 'With toppings & cheese', price: '₹99', best: false },
-    { name: 'Paneer Toofani Garlic Bread', desc: 'Spicy paneer topping', price: '₹119', best: false },
-  ],
-  maggi: [
-    { name: 'Veg Masala Maggi', desc: 'Loaded with veggies', price: '₹79', best: false },
-    { name: 'Hot Passion Spicy Maggi 🌶️', desc: 'Very spicy', price: '₹69', best: false },
-    { name: 'Double Masala Maggi', desc: 'Extra spice kick', price: '₹59', best: false },
-    { name: 'Cheese Chatori Maggi', desc: 'Extremely cheesy', price: '₹99', best: true },
-  ],
-  'cold-coffee': [
-    { name: 'Premium Cold Coffee', desc: 'Classic & creamy', price: '₹49', best: true },
-    { name: 'Strong Cold Coffee', desc: 'Extra caffeine kick', price: '₹59', best: false },
-    { name: 'Chocolate Cold Coffee', desc: 'Mixed with cocoa', price: '₹79', best: false },
-  ],
-  mojitos: [
-    { name: 'Surprise Mojito', desc: 'Barman special', price: '₹49', best: true },
-    { name: 'Korean Mojito 🌶️', desc: 'Spicy & refreshing', price: '₹49', best: false },
-    { name: 'Strawberry Mojito', desc: 'Sweet berry flavor', price: '₹49', best: false },
-    { name: 'Blue Heaven Mojito', desc: 'Refreshing blue curacao', price: '₹49', best: true },
-    { name: 'Cranberry/Peach/Passion', desc: 'Various fruit flavors', price: '₹49', best: false },
-  ],
-  milkshakes: [
-    { name: 'Oreo Chocolate Shake', desc: 'Crunchy oreo bits', price: '₹99', best: false },
-    { name: 'Brownie Blast Shake', desc: 'With loaded brownie', price: '₹119', best: true },
-    { name: 'KitKat Chocolate Shake', desc: 'Kitkat chunk blend', price: '₹109', best: false },
-  ],
-  desserts: [
-    { name: 'Sizzling Brownie', desc: 'Warm brownie with ice cream', price: '₹149', best: false },
-    { name: 'Kulhad Chocolaty Mud Pie', desc: 'Chocolate delight in kulhad', price: '₹199', best: true },
-  ],
-  combos: [
-    { name: 'Classic Burger + Drink', desc: 'OG Burger + Mojito/Ice Tea', price: '₹69', best: false },
-    { name: 'Pizza + Drink', desc: 'Sicilia Pizza + Mojito/Ice Tea', price: '₹149', best: false },
-    { name: 'Student Party Pack', desc: '3 Any Mojitos/Ice Teas', price: '₹99', best: true },
-  ],
-  'special-buns': [
-    { name: 'Cheese Pull & Tear Garlic Bun', desc: 'Loaded with cheese', price: '₹149', best: true },
-    { name: 'Korean Jalapeno Bun', desc: 'Spicy & cheesy', price: '₹149', best: false },
-  ],
-  toasties: [
-    { name: 'Korean Spicy Paneer', desc: 'Fusion toastie', price: '₹89', best: false },
-    { name: 'Peri Peri Cheese Blast', desc: 'Spicy cheese explosion', price: '₹99', best: false },
-    { name: 'Italian Treat', desc: 'Herbs & cheese', price: '₹79', best: false },
-  ],
-  nachos: [
-    { name: 'Cheesy Delight Nachos', desc: 'With cheese sauce', price: '₹129', best: false },
-    { name: 'Nachos with Cheese Dip', desc: 'Classic crunch', price: '₹79', best: false },
-    { name: 'Nachos & Salsa', desc: 'Spicy salsa dip', price: '₹149', best: true },
-  ],
-  'ice-tea': [
-    { name: 'Lemon/Peach Ice Tea', desc: 'Refreshing fruit tea', price: '₹49', best: false },
-    { name: 'American Blue Ice Tea', desc: 'Special blue blend', price: '₹49', best: true },
-  ],
-  'hot-beverages': [
-    { name: 'Hot Coffee', desc: 'Classic warm brew', price: '₹29', best: false },
-    { name: 'Hot Chocolate', desc: 'Rich & creamy', price: '₹39', best: true },
-  ]
+  burgers: {
+    icon: 'https://img.icons8.com/color/48/hamburger.png',
+    items: [
+      { name: 'Mexican King Burger', desc: 'Loaded burger with Mexican sauces & crunchy veggies', price: '₹89', best: true },
+      { name: 'Spicy Salsa Barbeque Burger', desc: 'Spicy + smoky barbeque flavor', price: '₹79' },
+      { name: 'Korean Burger 🌶️', desc: 'Korean spicy taste with special sauce', price: '₹69', spice: true },
+      { name: 'Double Tikki Burger', desc: 'Double crispy tikki burger', price: '₹79' },
+      { name: 'Classic OG Burger', desc: 'Classic simple burger', price: '₹49' },
+      { name: 'Royal Paneer Grilled Burger', desc: 'Premium paneer grilled burger', price: '₹139' },
+    ],
+    addons: ['Add Cheese Slice → ₹15', 'Double Cheese Slice → ₹30', 'Grill Any Burger → ₹30']
+  },
+  fries: {
+    icon: 'https://img.icons8.com/color/48/french-fries.png',
+    items: [
+      { name: 'Peri Peri French Fries', desc: 'Peri peri masala loaded fries', price: '₹99' },
+      { name: 'Salted French Fries', desc: 'Classic salted fries', price: '₹79' },
+      { name: 'Korean Cheesy Fries', desc: 'Cheese + Korean flavor fries', price: '₹149' },
+      { name: 'Sizzling Italian Fries', desc: 'Italian style loaded fries', price: '₹159' },
+    ],
+    addons: ['Cheese Dip → ₹40']
+  },
+  wraps: {
+    icon: 'https://img.icons8.com/fluency/48/burrito.png',
+    items: [
+      { name: 'Mexican Salsa Wrap', desc: 'Mexican filling with salsa', price: '₹129' },
+      { name: 'Classic Veg Wrap', desc: 'Veggie loaded wrap', price: '₹109' },
+      { name: 'Grilled Paneer Wrap', desc: 'Paneer grilled special wrap', price: '₹149', best: true },
+    ],
+    addons: ['Add Cheese → ₹30']
+  },
+  pizza: {
+    icon: 'https://img.icons8.com/color/48/pizza.png',
+    items: [
+      { name: 'Veg Exotica Pizza', desc: 'Loaded exotic veggie pizza', price: '₹159', best: true },
+      { name: 'Paneer Barbeque Pizza', desc: 'Paneer + BBQ flavor pizza', price: '₹189' },
+      { name: 'Hot To Hell Pizza 🌶️', desc: 'Extra spicy pizza', price: '₹149', spice: true },
+      { name: 'Pizza Di Sicilia', desc: 'Italian style pizza', price: '₹129' },
+      { name: 'Margherita Pizza', desc: 'Classic cheese pizza', price: '₹99' },
+      { name: 'The Xplod (Cheese Burst)', desc: 'Cheese burst special pizza', price: '₹169' },
+      { name: 'Golden Harvest Pizza', desc: 'Veggie loaded pizza', price: '₹109' },
+      { name: 'Four Cheese Pizza', desc: '4 cheese combination pizza', price: '₹169' },
+      { name: 'Korean Pizza', desc: 'Korean flavor special pizza', price: '₹159' },
+    ],
+    addons: ['Add Double Cheese → ₹40']
+  },
+  momos: {
+    icon: 'https://img.icons8.com/color/48/dumplings.png',
+    items: [
+      { name: 'Steam Momos', desc: 'Steamed veg momos', price: '₹89' },
+      { name: 'Fried Momos', desc: 'Crispy fried momos', price: '₹89' },
+      { name: 'Cheese Melting Gravy Momos', desc: 'Cheesy gravy loaded momos', price: '₹159', best: true },
+    ]
+  },
+  kulhad: {
+    icon: 'https://img.icons8.com/color/48/tea-cup.png',
+    items: [
+      { name: 'Cheese Volcano Kulhad Momos', desc: 'Kulhad served cheesy momos', price: '₹149' },
+      { name: 'Cheese Loaded Kulhad Pizza', desc: 'Pizza served in kulhad style', price: '₹149' },
+      { name: 'Cheese Chatori Kulhad Maggi', desc: 'Cheese loaded kulhad maggi', price: '₹149', best: true },
+    ]
+  },
+  sandwich: {
+    icon: 'https://img.icons8.com/color/48/sandwich.png',
+    items: [
+      { name: 'Veg Mexican Sandwich', desc: 'Mexican flavored sandwich', price: '₹139' },
+      { name: 'Paneer Maharaja Sandwich', desc: 'Paneer loaded sandwich', price: '₹149' },
+      { name: 'Veggie Mumbai Grilled Sandwich', desc: 'Mumbai street style sandwich', price: '₹109' },
+      { name: 'Cheese Chilli Sandwich', desc: 'Cheese + chilli flavor sandwich', price: '₹129', best: true },
+    ],
+    addons: ['Add Cheese → ₹30']
+  },
+  pasta: {
+    icon: 'https://img.icons8.com/color/48/spaghetti.png',
+    note: 'Regular → ₹139 | Baked → ₹169',
+    items: [
+      { name: 'Alfredo Pasta', desc: 'Creamy white sauce pasta', price: 'R:139 | B:169' },
+      { name: 'Arrabbiata Pasta', desc: 'Spicy red sauce pasta', price: 'R:139 | B:169' },
+      { name: 'Ala Rosey Pasta', desc: 'Pink sauce creamy pasta', price: 'R:139 | B:169', best: true },
+      { name: 'Peri Peri Pasta', desc: 'Peri peri spicy pasta', price: 'R:139 | B:169' },
+    ]
+  },
+  'garlic-bread': {
+    icon: 'https://img.icons8.com/color/48/baguette.png',
+    items: [
+      { name: 'Cheese Garlic Bread', desc: 'Classic cheesy bread', price: '₹89' },
+      { name: 'Supreme Treat Garlic Bread', desc: 'With toppings & cheese', price: '₹99' },
+      { name: 'Paneer Toofani Garlic Bread', desc: 'Spicy paneer topping', price: '₹119' },
+    ],
+    addons: ['Add Cheese → ₹30']
+  },
+  'special-buns': {
+    icon: 'https://img.icons8.com/color/48/bread.png',
+    items: [
+      { name: 'Cheese Pull & Tear Garlic Bun', desc: 'Cheesy garlic bun', price: '₹149', best: true },
+      { name: 'Korean Jalapeno Bun', desc: 'Korean spicy bun', price: '₹149' },
+    ]
+  },
+  toasties: {
+    icon: 'https://img.icons8.com/fluency/48/toast.png',
+    items: [
+      { name: 'Korean Spicy Paneer', price: '₹89' },
+      { name: 'Peri Peri Cheese Blast', price: '₹99' },
+      { name: 'Italian Treat', price: '₹79' },
+    ]
+  },
+  nachos: {
+    icon: 'https://img.icons8.com/color/48/nachos.png',
+    items: [
+      { name: 'Cheesy Delight Nachos', price: '₹129' },
+      { name: 'Nachos with Cheese Dip', price: '₹79' },
+      { name: 'Nachos & Salsa', price: '₹149', best: true },
+    ]
+  },
+  maggi: {
+    icon: 'https://img.icons8.com/color/48/noodles.png',
+    items: [
+      { name: 'Veg Masala Maggi', price: '₹79' },
+      { name: 'Hot Passion Spicy Maggi 🌶️', price: '₹69' },
+      { name: 'Double Masala Maggi', price: '₹59' },
+      { name: 'Cheese Chatori Maggi', price: '₹99', best: true },
+    ],
+    addons: ['Add Cheese → ₹30', 'Add Butter → ₹10']
+  },
+  'cold-coffee': {
+    icon: 'https://img.icons8.com/color/48/iced-coffee.png',
+    items: [
+      { name: 'Premium Cold Coffee', price: '₹49', best: true },
+      { name: 'Strong Cold Coffee', price: '₹59' },
+      { name: 'Chocolate Cold Coffee', price: '₹79' },
+    ],
+    addons: ['Add Ice Cream Scoop → ₹25']
+  },
+  mojitos: {
+    icon: 'https://img.icons8.com/color/48/cocktail.png',
+    note: 'All Mojitos → ₹49',
+    items: [
+      { name: 'Surprise Mojito', best: true },
+      { name: 'Korean Mojito 🌶️' },
+      { name: 'Strawberry Mojito' },
+      { name: 'Tangy Mango Mojito' },
+      { name: 'Pineapple Punch Mojito' },
+      { name: 'Mary Litchi Mojito' },
+      { name: 'Mint Mojito' },
+      { name: 'Orange Cinderella Mojito' },
+      { name: 'Blue Heaven Mojito', best: true },
+      { name: 'Rose Petal Mojito' },
+      { name: 'Cranberry Mojito' },
+      { name: 'Passion Mojito' },
+      { name: 'Peach Mojito' },
+    ],
+    addons: ['Add Float → ₹30', 'Add Injector → ₹30']
+  },
+  milkshakes: {
+    icon: 'https://img.icons8.com/color/48/milkshake.png',
+    items: [
+      { name: 'Oreo Chocolate Shake', price: '₹99' },
+      { name: 'Rose Delight Shake', price: '₹79' },
+      { name: 'Strawberry Shake', price: '₹79' },
+      { name: 'KitKat Chocolate Shake', price: '₹109' },
+      { name: 'Brownie Blast Shake', price: '₹119', best: true },
+    ],
+    addons: ['Add Ice Cream Scoop → ₹25']
+  },
+  'ice-tea': {
+    icon: 'https://img.icons8.com/fluency/48/tea.png',
+    note: 'All → ₹49',
+    items: [
+      { name: 'Lemon Ice Tea' },
+      { name: 'Peach Ice Tea' },
+      { name: 'Passion Fruit Ice Tea' },
+      { name: 'Cranberry Ice Tea' },
+      { name: 'American Blue Ice Tea', best: true },
+    ]
+  },
+  'hot-beverages': {
+    icon: 'https://img.icons8.com/color/48/coffee.png',
+    items: [
+      { name: 'Hot Coffee', price: '₹29' },
+      { name: 'Hot Chocolate', price: '₹39', best: true },
+    ]
+  },
+  desserts: {
+    icon: 'https://img.icons8.com/color/48/cake.png',
+    items: [
+      { name: 'Sizzling Brownie', price: '₹149' },
+      { name: 'Special Kulhad Chocolaty Mud Pie', price: '₹199', best: true },
+    ]
+  },
+  combos: {
+    icon: 'https://img.icons8.com/fluency/48/fast-food.png',
+    items: [
+      { name: 'Classic OG Burger + Any Mojito/Ice Tea', price: '₹69' },
+      { name: 'Pizza Di Sicilia + Any Mojito/Ice Tea', price: '₹149' },
+      { name: 'Any Toastie + French Fries + Any Mojito/Ice Tea', price: '₹199' },
+      { name: 'Any Kulhad + Any Mojito/Ice Tea', price: '₹169' },
+      { name: 'Any Pizza + Any Mojito/Ice Tea', price: '₹199' },
+      { name: '3 Any Mojito/Ice Tea', price: '₹99', best: true },
+      { name: 'Korean Burger + French Fries + Any Mojito/Ice Tea', price: '₹149' },
+      { name: 'Any Grilled Sandwich + Any Mojito/Ice Tea', price: '₹169' },
+      { name: '2 Premium Cold Coffee', price: '₹89' },
+    ]
+  },
+  'make-a-meal': {
+    icon: 'https://img.icons8.com/fluency/48/meal.png',
+    items: [
+      { name: 'French Fries + Any Mojito/Ice Tea', price: '₹99' },
+      { name: 'Garlic Bread + Any Mojito/Ice Tea', price: '₹109' },
+    ],
+    note: '🔥 Add ₹10 → Replace Mojito with Cold Coffee'
+  }
 };
 
 // ─── Showcase Data ───
@@ -131,7 +231,7 @@ const showcaseItems = [
 
 // ─── Reviews Data ───
 const reviews = [
-  { name: 'Shashank Gupta', initial: 'S', text: 'Zorko Restaurant is one of the best hangout spots in Jiyanpur. The ambience is modern, cozy, and very Instagram-worthy—perfect for friends and casual dates. The food quality is good, especially their pizza, pasta, and shakes.', stars: 4, source: 'Google Review' },
+  { name: 'Shashank Gupta', initial: 'S', text: 'Zorko Restaurant is one of the best hangout spots in Jiyanpur. The ambience is modern, cozy, and very Instagram-worthy—perfect for friends and casual dates. The food quality is good, especially their pizza, pasta, and shakes.', stars: 5, source: 'Google Review' },
   { name: 'Pravesh Singh', initial: 'P', text: 'Best restaurant in our Jiyanpur 👌 Family friendly restaurant 👍 It\'s extraordinary😉', stars: 5, source: 'Google Review' },
   { name: 'Nandani', initial: 'N', text: 'Zorko in Jiyanpur is honestly a game-changer for food lovers in the area. The place brings a fresh vibe with its modern setup, clean environment, and quick service that you usually don’t expect in a small town. The menu is loaded with variety—especially their burgers, pizzas, and cheesy snacks—which are full of flavor and perfectly cooked.', stars: 5, source: 'Google Review' },
   { name: 'Shyam Kumar (SKS)', initial: 'S', text: 'Great place to hang out with friends. Specially their mojito was really good and refreshing!', stars: 5, source: 'Google Review' },
@@ -141,6 +241,14 @@ const reviews = [
 export default function Home() {
   const [activeCat, setActiveCat] = useState('burgers');
   const [scrolled, setScrolled] = useState(false);
+  const categoriesRef = useRef(null);
+
+  const scrollCategories = (dir) => {
+    if (categoriesRef.current) {
+      const scrollAmt = dir === 'left' ? -200 : 200;
+      categoriesRef.current.scrollBy({ left: scrollAmt, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -268,30 +376,59 @@ export default function Home() {
         <div className="container">
           <div className="reveal">
             <p className="section-label">Signature Menu</p>
-            <h2 className="section-title">Taste What&apos;s<br />Trending</h2>
+            <h2 className="section-title">🍔 ZORKO JIYANPUR — COMPLETE DETAILED MENU</h2>
           </div>
-          <div className="menu-categories reveal">
-            {Object.keys(menuData).map((cat) => (
-              <button 
-                key={cat} 
-                className={`menu-cat-btn ${activeCat === cat ? 'active' : ''}`}
-                onClick={() => setActiveCat(cat)}
-              >
-                {cat.charAt(0).toUpperCase() + cat.slice(1).replace('-', ' ')}
-              </button>
-            ))}
+          <div className="menu-categories-wrapper reveal">
+            <button className="nav-arrow left" onClick={() => scrollCategories('left')}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div className="menu-categories" ref={categoriesRef}>
+              {Object.keys(menuData).map((cat) => (
+                <button 
+                  key={cat} 
+                  className={`menu-cat-btn ${activeCat === cat ? 'active' : ''}`}
+                  onClick={() => setActiveCat(cat)}
+                >
+                  <img src={menuData[cat].icon} alt={cat} className="cat-icon" />
+                  {cat.charAt(0).toUpperCase() + cat.slice(1).replace('-', ' ')}
+                </button>
+              ))}
+            </div>
+            <button className="nav-arrow right" onClick={() => scrollCategories('right')}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
           </div>
+
+          <div className="menu-header reveal">
+            <h3 className="cat-header-title">{activeCat.toUpperCase().replace('-', ' ')}</h3>
+            {menuData[activeCat].note && <p className="cat-note">{menuData[activeCat].note}</p>}
+          </div>
+
           <div className="menu-grid reveal">
-            {menuData[activeCat].map((item, i) => (
+            {menuData[activeCat].items.map((item, i) => (
               <div key={i} className="menu-item">
                 <div className="menu-item-info">
-                  <h4>{item.name} {item.best && <span className="bestseller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{width:'10px',height:'10px',display:'inline-block',verticalAlign:'middle',marginRight:'2px'}}><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>BEST</span>}</h4>
+                  <h4>
+                    {item.name} 
+                    {item.best && <span className="bestseller">⭐ BEST</span>}
+                  </h4>
                   <p>{item.desc}</p>
                 </div>
-                <span className="menu-price">{item.price}</span>
+                {item.price && <span className="menu-price">💰 {item.price}</span>}
               </div>
             ))}
           </div>
+
+          {menuData[activeCat].addons && (
+            <div className="menu-addons reveal">
+              <h5>➕ {activeCat.toUpperCase().replace('-', ' ')} ADD-ONS</h5>
+              <div className="addons-grid">
+                {menuData[activeCat].addons.map((addon, i) => (
+                  <div key={i} className="addon-item">{addon}</div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -378,7 +515,7 @@ export default function Home() {
           </div>
           <div className="location-grid reveal">
             <div className="map-container">
-              <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=83.05%2C26.15%2C83.15%2C26.25&layer=mapnik" allowFullScreen loading="lazy"></iframe>
+              <iframe src="https://maps.google.com/maps?q=Zorko%20Restaurant%20Jiyanpur%20Doharighat%20Road%20near%20Hydel%20in%20front%20of%20Shiv%20Mandir&t=&z=16&ie=UTF8&iwloc=&output=embed" allowFullScreen loading="lazy"></iframe>
             </div>
             <div className="location-info">
               <div className="location-detail">
@@ -387,7 +524,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h4>Address</h4>
-                  <p>Doharighat Road, Jiyanpur,<br />Azamgarh, Uttar Pradesh</p>
+                  <p>Doharighat Road, near Hydel,<br />in front of Shiv Mandir, Jiyanpur,<br />Khankah Bahrampur, UP 276140</p>
                 </div>
               </div>
               <div className="location-detail">
@@ -405,7 +542,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h4>Contact</h4>
-                  <p>+91 92781 40402<br />zorko.jiyanpur@gmail.com</p>
+                  <p>+91 92781 40402<br />zorkojiyanpur1@gmail.com</p>
                 </div>
               </div>
               <button onClick={() => window.open('https://maps.app.goo.gl/9y75o3xCu1iQ7kn68', '_blank')} className="btn-primary" style={{ alignSelf: 'flex-start', marginTop: '8px' }}>
