@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 // ─── Menu Data ───
 const menuData = {
@@ -233,15 +233,582 @@ const showcaseItems = [
 const reviews = [
   { name: 'Shashank Gupta', initial: 'S', text: 'Zorko Restaurant is one of the best hangout spots in Jiyanpur. The ambience is modern, cozy, and very Instagram-worthy—perfect for friends and casual dates. The food quality is good, especially their pizza, pasta, and shakes.', stars: 5, source: 'Google Review' },
   { name: 'Pravesh Singh', initial: 'P', text: 'Best restaurant in our Jiyanpur 👌 Family friendly restaurant 👍 It\'s extraordinary😉', stars: 5, source: 'Google Review' },
-  { name: 'Nandani', initial: 'N', text: 'Zorko in Jiyanpur is honestly a game-changer for food lovers in the area. The place brings a fresh vibe with its modern setup, clean environment, and quick service that you usually don’t expect in a small town. The menu is loaded with variety—especially their burgers, pizzas, and cheesy snacks—which are full of flavor and perfectly cooked.', stars: 5, source: 'Google Review' },
+  { name: 'Nandani', initial: 'N', text: 'Zorko in Jiyanpur is honestly a game-changer for food lovers in the area. The place brings a fresh vibe with its modern setup, clean environment, and quick service that you usually don\'t expect in a small town. The menu is loaded with variety—especially their burgers, pizzas, and cheesy snacks—which are full of flavor and perfectly cooked.', stars: 5, source: 'Google Review' },
   { name: 'Shyam Kumar (SKS)', initial: 'S', text: 'Great place to hang out with friends. Specially their mojito was really good and refreshing!', stars: 5, source: 'Google Review' },
   { name: 'Bandana Singh', initial: 'B', text: 'The taste of the food was really amazing and the quality was top notch. Highly recommended!', stars: 5, source: 'Google Review' },
 ];
+
+// ─── Leaderboard Data (fake + user) ───
+const fakeLeaders = [
+  { name: 'Shashank G.', coins: 42 },
+  { name: 'Nandani', coins: 35 },
+  { name: 'Aryan S.', coins: 28 },
+  { name: 'Pravesh S.', coins: 21 },
+  { name: 'Bandana S.', coins: 15 },
+];
+
+// ─── Game Constants ───
+const MEMORY_EMOJIS = ['🍔', '🍕', '🌮', '🍟', '🥤', '🧁'];
+const FOOD_CATCHER_ITEMS = ['🍔', '🍕', '🌮', '🍟', '🥤', '🧁', '🍩', '🥪'];
+const FOOD_CATCHER_BOMBS = ['🌶️', '💣', '🔥'];
+
+// ════════════════════════════════════════
+// ─── GAME COMPONENTS ───
+// ════════════════════════════════════════
+
+// ─── Tic Tac Toe ───
+function TicTacToe({ onWin, onBack }) {
+  const [board, setBoard] = useState(Array(9).fill(null));
+  const [isPlayerTurn, setIsPlayerTurn] = useState(true);
+  const [winner, setWinner] = useState(null);
+  const [winLine, setWinLine] = useState(null);
+
+  const checkWinner = (b) => {
+    const lines = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+    for (let line of lines) {
+      const [a,c,d] = line;
+      if (b[a] && b[a] === b[c] && b[a] === b[d]) return { winner: b[a], line };
+    }
+    return null;
+  };
+
+  const getAIMove = (b) => {
+    // Try to win
+    for (let i = 0; i < 9; i++) {
+      if (!b[i]) { const t = [...b]; t[i] = 'O'; if (checkWinner(t)?.winner === 'O') return i; }
+    }
+    // Block player
+    for (let i = 0; i < 9; i++) {
+      if (!b[i]) { const t = [...b]; t[i] = 'X'; if (checkWinner(t)?.winner === 'X') return i; }
+    }
+    // Center
+    if (!b[4]) return 4;
+    // Corners
+    const corners = [0,2,6,8].filter(i => !b[i]);
+    if (corners.length) return corners[Math.floor(Math.random() * corners.length)];
+    // Any
+    const empty = b.map((v,i) => v ? -1 : i).filter(i => i !== -1);
+    return empty[Math.floor(Math.random() * empty.length)];
+  };
+
+  const handleClick = (i) => {
+    if (board[i] || winner || !isPlayerTurn) return;
+    const newBoard = [...board];
+    newBoard[i] = 'X';
+    const result = checkWinner(newBoard);
+    if (result) {
+      setBoard(newBoard);
+      setWinner(result.winner);
+      setWinLine(result.line);
+      if (result.winner === 'X') onWin();
+      return;
+    }
+    if (newBoard.every(c => c)) { setBoard(newBoard); setWinner('draw'); return; }
+    setBoard(newBoard);
+    setIsPlayerTurn(false);
+  };
+
+  useEffect(() => {
+    if (!isPlayerTurn && !winner) {
+      const timer = setTimeout(() => {
+        const newBoard = [...board];
+        const move = getAIMove(newBoard);
+        if (move !== undefined && move !== -1) {
+          newBoard[move] = 'O';
+          const result = checkWinner(newBoard);
+          if (result) { setBoard(newBoard); setWinner(result.winner); setWinLine(result.line); return; }
+          if (newBoard.every(c => c)) { setBoard(newBoard); setWinner('draw'); return; }
+          setBoard(newBoard);
+        }
+        setIsPlayerTurn(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isPlayerTurn, winner]);
+
+  const reset = () => { setBoard(Array(9).fill(null)); setIsPlayerTurn(true); setWinner(null); setWinLine(null); };
+
+  return (
+    <div className="game-container">
+      <div className="game-top-bar">
+        <button className="game-back-btn" onClick={onBack}>← Back</button>
+        <h3>Tic Tac Toe</h3>
+        <span className="game-badge">vs Zorko Bot 🤖</span>
+      </div>
+      <p className="game-status">
+        {winner === 'X' ? '🎉 You Won! +1 Coin!' : winner === 'O' ? '😢 Bot Wins! Try Again' : winner === 'draw' ? '🤝 Draw!' : isPlayerTurn ? 'Your Turn (X)' : 'Bot Thinking...'}
+      </p>
+      <div className="ttt-board">
+        {board.map((cell, i) => (
+          <button
+            key={i}
+            className={`ttt-cell ${cell ? 'filled' : ''} ${cell === 'X' ? 'player-x' : cell === 'O' ? 'player-o' : ''} ${winLine?.includes(i) ? 'win-cell' : ''}`}
+            onClick={() => handleClick(i)}
+            disabled={!!cell || !!winner || !isPlayerTurn}
+          >
+            {cell}
+          </button>
+        ))}
+      </div>
+      {winner && <button className="game-retry-btn" onClick={reset}>Play Again</button>}
+    </div>
+  );
+}
+
+// ─── Rock Paper Scissors ───
+function RockPaperScissors({ onWin, onBack }) {
+  const [playerChoice, setPlayerChoice] = useState(null);
+  const [cpuChoice, setCpuChoice] = useState(null);
+  const [roundResult, setRoundResult] = useState(null);
+  const [playerScore, setPlayerScore] = useState(0);
+  const [cpuScore, setCpuScore] = useState(0);
+  const [round, setRound] = useState(1);
+  const [matchOver, setMatchOver] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+  const choices = ['🪨', '📄', '✂️'];
+  const labels = ['Rock', 'Paper', 'Scissors'];
+
+  const getResult = (p, c) => {
+    if (p === c) return 'draw';
+    if ((p === 0 && c === 2) || (p === 1 && c === 0) || (p === 2 && c === 1)) return 'win';
+    return 'lose';
+  };
+
+  const play = (pi) => {
+    if (matchOver || showResult) return;
+    const ci = Math.floor(Math.random() * 3);
+    setPlayerChoice(pi);
+    setCpuChoice(ci);
+    const result = getResult(pi, ci);
+    setRoundResult(result);
+    setShowResult(true);
+
+    setTimeout(() => {
+      let ps = playerScore, cs = cpuScore;
+      if (result === 'win') { ps = playerScore + 1; setPlayerScore(ps); }
+      else if (result === 'lose') { cs = cpuScore + 1; setCpuScore(cs); }
+
+      if (ps >= 2 || cs >= 2) {
+        setMatchOver(true);
+        if (ps >= 2) onWin();
+      } else {
+        setRound(r => r + 1);
+      }
+      setShowResult(false);
+    }, 1200);
+  };
+
+  const reset = () => {
+    setPlayerChoice(null); setCpuChoice(null); setRoundResult(null);
+    setPlayerScore(0); setCpuScore(0); setRound(1);
+    setMatchOver(false); setShowResult(false);
+  };
+
+  return (
+    <div className="game-container">
+      <div className="game-top-bar">
+        <button className="game-back-btn" onClick={onBack}>← Back</button>
+        <h3>Rock Paper Scissors</h3>
+        <span className="game-badge">Best of 3 👨‍🍳</span>
+      </div>
+      <div className="rps-scores">
+        <div className={`rps-score-card ${playerScore > cpuScore ? 'leading' : ''}`}>
+          <span className="rps-score-label">You</span>
+          <span className="rps-score-num">{playerScore}</span>
+        </div>
+        <div className="rps-round-badge">Round {round}</div>
+        <div className={`rps-score-card ${cpuScore > playerScore ? 'leading' : ''}`}>
+          <span className="rps-score-label">Chef</span>
+          <span className="rps-score-num">{cpuScore}</span>
+        </div>
+      </div>
+
+      {showResult && (
+        <div className="rps-battle">
+          <div className={`rps-choice-display ${roundResult === 'win' ? 'winner' : ''}`}>
+            <span className="rps-big-emoji">{choices[playerChoice]}</span>
+            <span>You</span>
+          </div>
+          <span className="rps-vs">VS</span>
+          <div className={`rps-choice-display ${roundResult === 'lose' ? 'winner' : ''}`}>
+            <span className="rps-big-emoji">{choices[cpuChoice]}</span>
+            <span>Chef</span>
+          </div>
+        </div>
+      )}
+
+      {!showResult && !matchOver && (
+        <div className="rps-choices">
+          <p className="game-status">Pick your weapon!</p>
+          <div className="rps-buttons">
+            {choices.map((c, i) => (
+              <button key={i} className="rps-pick-btn" onClick={() => play(i)}>
+                <span className="rps-pick-emoji">{c}</span>
+                <span className="rps-pick-label">{labels[i]}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {matchOver && (
+        <div className="game-result-box">
+          <p className="game-status">{playerScore >= 2 ? '🎉 You Beat the Chef! +1 Coin!' : '😢 Chef Wins! Try Again!'}</p>
+          <button className="game-retry-btn" onClick={reset}>Play Again</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Food Catcher ───
+function FoodCatcher({ onWin, onBack }) {
+  const canvasRef = useRef(null);
+  const gameRef = useRef({ basket: 0, foods: [], score: 0, lives: 3, gameOver: false, won: false, frame: 0, spawnTimer: 0 });
+  const animRef = useRef(null);
+  const [score, setScore] = useState(0);
+  const [lives, setLives] = useState(3);
+  const [gameOver, setGameOver] = useState(false);
+  const [won, setWon] = useState(false);
+  const [started, setStarted] = useState(false);
+  const keysRef = useRef({ left: false, right: false });
+
+  const initGame = useCallback(() => {
+    const g = gameRef.current;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const W = canvas.width;
+    g.basket = W / 2 - 30;
+    g.foods = [];
+    g.score = 0;
+    g.lives = 3;
+    g.gameOver = false;
+    g.won = false;
+    g.frame = 0;
+    g.spawnTimer = 0;
+    setScore(0); setLives(3); setGameOver(false); setWon(false);
+  }, []);
+
+  const spawnFood = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const W = canvas.width;
+    const isBomb = Math.random() < 0.2;
+    const items = isBomb ? FOOD_CATCHER_BOMBS : FOOD_CATCHER_ITEMS;
+    gameRef.current.foods.push({
+      x: Math.random() * (W - 40) + 10,
+      y: -30,
+      emoji: items[Math.floor(Math.random() * items.length)],
+      isBomb,
+      speed: 1.5 + Math.random() * 1.5,
+    });
+  }, []);
+
+  const gameLoop = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const g = gameRef.current;
+    const W = canvas.width, H = canvas.height;
+
+    if (g.gameOver) return;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Move basket
+    if (keysRef.current.left) g.basket = Math.max(0, g.basket - 5);
+    if (keysRef.current.right) g.basket = Math.min(W - 60, g.basket + 5);
+
+    // Draw basket
+    ctx.font = '36px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🍽️', g.basket + 30, H - 16);
+
+    // Spawn
+    g.spawnTimer++;
+    if (g.spawnTimer > 50) { spawnFood(); g.spawnTimer = 0; }
+
+    // Update foods
+    g.foods = g.foods.filter(f => {
+      f.y += f.speed;
+      ctx.font = '28px serif';
+      ctx.fillText(f.emoji, f.x + 14, f.y + 28);
+
+      // Catch
+      if (f.y + 28 >= H - 40 && f.x > g.basket - 15 && f.x < g.basket + 65) {
+        if (f.isBomb) {
+          g.lives--;
+          setLives(g.lives);
+          if (g.lives <= 0) { g.gameOver = true; setGameOver(true); }
+        } else {
+          g.score++;
+          setScore(g.score);
+          if (g.score >= 10) { g.gameOver = true; g.won = true; setWon(true); setGameOver(true); onWin(); }
+        }
+        return false;
+      }
+
+      // Missed good food
+      if (f.y > H + 30) {
+        if (!f.isBomb) { g.lives--; setLives(g.lives); if (g.lives <= 0) { g.gameOver = true; setGameOver(true); } }
+        return false;
+      }
+      return true;
+    });
+
+    // HUD
+    ctx.fillStyle = '#FF8119';
+    ctx.font = 'bold 14px "Plus Jakarta Sans", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Score: ${g.score}/10`, 10, 22);
+    ctx.textAlign = 'right';
+    ctx.fillText(`Lives: ${'❤️'.repeat(g.lives)}`, W - 10, 22);
+
+    if (!g.gameOver) animRef.current = requestAnimationFrame(gameLoop);
+  }, [spawnFood, onWin]);
+
+  useEffect(() => {
+    if (!started) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.width = Math.min(360, window.innerWidth - 40);
+    canvas.height = 500;
+    initGame();
+
+    const onKeyDown = (e) => { if (e.key === 'ArrowLeft') keysRef.current.left = true; if (e.key === 'ArrowRight') keysRef.current.right = true; };
+    const onKeyUp = (e) => { if (e.key === 'ArrowLeft') keysRef.current.left = false; if (e.key === 'ArrowRight') keysRef.current.right = false; };
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    animRef.current = requestAnimationFrame(gameLoop);
+    return () => { window.removeEventListener('keydown', onKeyDown); window.removeEventListener('keyup', onKeyUp); cancelAnimationFrame(animRef.current); };
+  }, [started, initGame, gameLoop]);
+
+  const restart = () => { initGame(); animRef.current = requestAnimationFrame(gameLoop); };
+  const holdLeft = () => { keysRef.current.left = true; };
+  const holdRight = () => { keysRef.current.right = true; };
+  const release = () => { keysRef.current.left = false; keysRef.current.right = false; };
+
+  // Touch move on canvas
+  const handleTouchMove = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    gameRef.current.basket = Math.max(0, Math.min(canvas.width - 60, x - 30));
+  };
+
+  return (
+    <div className="game-container">
+      <div className="game-top-bar">
+        <button className="game-back-btn" onClick={onBack}>← Back</button>
+        <h3>Food Catcher</h3>
+        <span className="game-badge">Catch 10! 🍽️</span>
+      </div>
+      {!started ? (
+        <div className="game-start-screen">
+          <div className="game-start-emoji">🍔</div>
+          <h4>Catch falling foods!</h4>
+          <p>Catch 10 items to earn a coin.<br/>Avoid 🌶️💣🔥 bombs!</p>
+          <button className="game-retry-btn" onClick={() => setStarted(true)}>Start Game</button>
+        </div>
+      ) : (
+        <>
+          <div className="catcher-canvas-wrap">
+            <canvas ref={canvasRef} className="catcher-canvas" onTouchMove={handleTouchMove} onTouchStart={handleTouchMove} />
+          </div>
+          <div className="catcher-controls">
+            <button className="catcher-ctrl-btn" onTouchStart={holdLeft} onMouseDown={holdLeft} onTouchEnd={release} onMouseUp={release} onMouseLeave={release}>◀</button>
+            <span className="catcher-score-display">🍔 {score}/10 &nbsp; ❤️ {lives}</span>
+            <button className="catcher-ctrl-btn" onTouchStart={holdRight} onMouseDown={holdRight} onTouchEnd={release} onMouseUp={release} onMouseLeave={release}>▶</button>
+          </div>
+          {gameOver && (
+            <div className="game-result-box">
+              <p className="game-status">{won ? '🎉 You Caught Them All! +1 Coin!' : '💥 Game Over! Try Again!'}</p>
+              <button className="game-retry-btn" onClick={restart}>Play Again</button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── Memory Match ───
+function MemoryMatch({ onWin, onBack }) {
+  const [cards, setCards] = useState([]);
+  const [flipped, setFlipped] = useState([]);
+  const [matched, setMatched] = useState([]);
+  const [moves, setMoves] = useState(0);
+  const [gameOver, setGameOver] = useState(false);
+  const [won, setWon] = useState(false);
+  const lockRef = useRef(false);
+
+  useEffect(() => { initCards(); }, []);
+
+  const initCards = () => {
+    const pairs = [...MEMORY_EMOJIS, ...MEMORY_EMOJIS];
+    const shuffled = pairs.sort(() => Math.random() - 0.5).map((emoji, i) => ({ id: i, emoji }));
+    setCards(shuffled);
+    setFlipped([]); setMatched([]); setMoves(0); setGameOver(false); setWon(false);
+    lockRef.current = false;
+  };
+
+  const handleFlip = (id) => {
+    if (lockRef.current || flipped.includes(id) || matched.includes(id) || gameOver) return;
+
+    const newFlipped = [...flipped, id];
+    setFlipped(newFlipped);
+
+    if (newFlipped.length === 2) {
+      lockRef.current = true;
+      const newMoves = moves + 1;
+      setMoves(newMoves);
+
+      const [a, b] = newFlipped;
+      if (cards[a].emoji === cards[b].emoji) {
+        const newMatched = [...matched, a, b];
+        setMatched(newMatched);
+        setFlipped([]);
+        lockRef.current = false;
+        if (newMatched.length === cards.length) {
+          setGameOver(true);
+          if (newMoves <= 18) { setWon(true); onWin(); } else { setWon(false); }
+        }
+      } else {
+        setTimeout(() => { setFlipped([]); lockRef.current = false; }, 800);
+      }
+
+      if (newMoves >= 18 && !gameOver) {
+        setTimeout(() => {
+          const matchedSoFar = matched.length + (cards[newFlipped[0]]?.emoji === cards[newFlipped[1]]?.emoji ? 2 : 0);
+          if (matchedSoFar < cards.length) { setGameOver(true); setWon(false); }
+        }, 900);
+      }
+    }
+  };
+
+  return (
+    <div className="game-container">
+      <div className="game-top-bar">
+        <button className="game-back-btn" onClick={onBack}>← Back</button>
+        <h3>Memory Match</h3>
+        <span className="game-badge">Moves: {moves}/18 🧠</span>
+      </div>
+      <p className="game-status">
+        {gameOver ? (won ? '🎉 Perfect Memory! +1 Coin!' : '😢 Too many moves! Try again!') : `Match all pairs in ≤18 moves`}
+      </p>
+      <div className="memory-grid">
+        {cards.map((card, i) => (
+          <button
+            key={card.id}
+            className={`memory-card ${flipped.includes(i) || matched.includes(i) ? 'flipped' : ''} ${matched.includes(i) ? 'matched' : ''}`}
+            onClick={() => handleFlip(i)}
+          >
+            <div className="memory-card-inner">
+              <div className="memory-card-front">🍽️</div>
+              <div className="memory-card-back">{card.emoji}</div>
+            </div>
+          </button>
+        ))}
+      </div>
+      {gameOver && <button className="game-retry-btn" onClick={initCards}>Play Again</button>}
+    </div>
+  );
+}
+
+// ─── Coin Modal ───
+function CoinModal({ coins, history, onClose }) {
+  const discount = (coins / 100).toFixed(1);
+  return (
+    <div className="coin-modal-overlay" onClick={onClose}>
+      <div className="coin-modal" onClick={e => e.stopPropagation()}>
+        <button className="coin-modal-close" onClick={onClose}>✕</button>
+        <div className="coin-modal-header">
+          <div className="coin-modal-big-coin">🪙</div>
+          <h2>{coins} Coins</h2>
+          <div className="coin-discount-badge">{discount}% OFF</div>
+          <p className="coin-modal-sub">100 coins = 1% discount on your order!</p>
+        </div>
+        <div className="coin-modal-body">
+          <h4>📜 Coin History</h4>
+          {history.length === 0 ? (
+            <p className="coin-empty">No coins earned yet. Play games to earn!</p>
+          ) : (
+            <div className="coin-history-list">
+              {[...history].reverse().map((h, i) => (
+                <div key={i} className="coin-history-item">
+                  <div className="coin-history-game">
+                    <span className="coin-dot">🪙</span>
+                    <span>{h.game}</span>
+                  </div>
+                  <div className="coin-history-meta">
+                    <span>+{h.amount} coin</span>
+                    <span className="coin-history-date">{h.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        {coins >= 100 && (
+          <div className="coin-claim-section">
+            <p>🎁 Show this screen at Zorko to claim <strong>{discount}% OFF</strong>!</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+// ════════════════════════════════════════
+// ─── MAIN HOME COMPONENT ───
+// ════════════════════════════════════════
 
 export default function Home() {
   const [activeCat, setActiveCat] = useState('burgers');
   const [scrolled, setScrolled] = useState(false);
   const categoriesRef = useRef(null);
+
+  // Game state
+  const [coins, setCoins] = useState(0);
+  const [coinHistory, setCoinHistory] = useState([]);
+  const [activeGame, setActiveGame] = useState(null);
+  const [showCoinModal, setShowCoinModal] = useState(false);
+  const [coinCelebrate, setCoinCelebrate] = useState(false);
+
+  // Load from localStorage
+  useEffect(() => {
+    try {
+      const savedCoins = localStorage.getItem('zorko_coins');
+      const savedHistory = localStorage.getItem('zorko_coin_history');
+      if (savedCoins) setCoins(parseInt(savedCoins, 10));
+      if (savedHistory) setCoinHistory(JSON.parse(savedHistory));
+    } catch (e) { /* ignore */ }
+  }, []);
+
+  const awardCoin = (gameName) => {
+    const newCoins = coins + 1;
+    const entry = {
+      game: gameName,
+      amount: 1,
+      date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    };
+    const newHistory = [...coinHistory, entry];
+    setCoins(newCoins);
+    setCoinHistory(newHistory);
+    setCoinCelebrate(true);
+    setTimeout(() => setCoinCelebrate(false), 2000);
+    try {
+      localStorage.setItem('zorko_coins', newCoins.toString());
+      localStorage.setItem('zorko_coin_history', JSON.stringify(newHistory));
+    } catch (e) { /* ignore */ }
+  };
 
   const scrollCategories = (dir) => {
     if (categoriesRef.current) {
@@ -274,8 +841,30 @@ export default function Home() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  // Build leaderboard
+  const leaderboard = [...fakeLeaders, { name: 'You 🏆', coins }]
+    .sort((a, b) => b.coins - a.coins)
+    .slice(0, 6);
+
+  const gameCards = [
+    { id: 'tictactoe', emoji: '❌', title: 'Tic Tac Toe', desc: 'Beat Zorko Bot', color: '#FF8119' },
+    { id: 'rps', emoji: '✊', title: 'Rock Paper Scissors', desc: 'vs Zorko Chef', color: '#2D68FF' },
+    { id: 'catcher', emoji: '🍔', title: 'Food Catcher', desc: 'Catch 10 foods!', color: '#25D366' },
+    { id: 'memory', emoji: '🧠', title: 'Memory Match', desc: 'Find all pairs', color: '#e6683c' },
+  ];
+
   return (
     <>
+      {/* ─── Coin Celebration ─── */}
+      {coinCelebrate && (
+        <div className="coin-celebrate">
+          <div className="coin-celebrate-inner">
+            <span className="coin-celebrate-emoji">🪙</span>
+            <span>+1 Coin!</span>
+          </div>
+        </div>
+      )}
+
       {/* ─── Top Nav ─── */}
       <nav className={`top-nav ${scrolled ? 'scrolled' : ''}`}>
         <div className="logo" onClick={() => scrollToSection('hero')} style={{ cursor: 'pointer' }}>
@@ -289,7 +878,7 @@ export default function Home() {
           <a href="#menu">Menu</a>
           <a href="#about">About</a>
           <a href="#reviews">Reviews</a>
-          <a href="#location">Location</a>
+          <a href="#game-zone">Game</a>
         </div>
       </nav>
 
@@ -320,7 +909,7 @@ export default function Home() {
 
       {/* ─── Quick Action Bar ─── */}
       <div className="action-bar" id="actionBar">
-        <button className={`action-btn ${activeCat === 'menu' ? 'active' : ''}`} onClick={() => scrollToSection('menu')}>
+        <button className="action-btn" onClick={() => scrollToSection('menu')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
           Menu
         </button>
@@ -332,9 +921,9 @@ export default function Home() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
           Offers
         </button>
-        <button className="action-btn" onClick={() => scrollToSection('location')}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 5.16 13 19.79 19.79 0 0 1 2.09 4.18 2 2 0 0 1 4.05 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          Contact
+        <button className="action-btn" onClick={() => scrollToSection('game-zone')}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 12h4m-2-2v4m5 1h2m-1-1v.01M15 10h.01M21 15a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6z"/></svg>
+          Game
         </button>
       </div>
 
@@ -496,13 +1085,79 @@ export default function Home() {
           <p className="section-label">@zorkojiyanpur</p>
           <h2 className="section-title">Follow the<br />Flavor</h2>
           <div className="insta-grid">
-            {['🍔','🥤','🧁','🍕','🌮','🥪',' Fries','🍩'].map((e, i) => (
+            {['🍔','🥤','🧁','🍕','🌮','🥪','🍟','🍩'].map((e, i) => (
               <div key={i} className="insta-item" style={{ background: '#141414' }}>
                 {e}
                 <div className="insta-overlay">▶ View Reel</div>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════ */}
+      {/* ─── GAME ZONE ─── */}
+      {/* ════════════════════════════════════════ */}
+      <section id="game-zone" className="game-zone-section">
+        <div className="container">
+          <div className="reveal">
+            <p className="section-label">Play & Win</p>
+            <h2 className="section-title">🎮 Zorko<br />Game Zone</h2>
+          </div>
+
+          {/* ─── Leaderboard + Coins Bar ─── */}
+          <div className="gz-top-bar reveal">
+            <div className="gz-leaderboard">
+              <h4>🏆 Leaderboard</h4>
+              <div className="gz-lb-list">
+                {leaderboard.map((p, i) => (
+                  <div key={i} className={`gz-lb-item ${p.name.includes('You') ? 'gz-lb-you' : ''}`}>
+                    <span className="gz-lb-rank">{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</span>
+                    <span className="gz-lb-name">{p.name}</span>
+                    <span className="gz-lb-coins">{p.coins} 🪙</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="gz-coin-widget">
+              <div className="gz-coin-display" onClick={() => setShowCoinModal(true)}>
+                <div className="gz-coin-icon">🪙</div>
+                <div className="gz-coin-info">
+                  <span className="gz-coin-count">{coins}</span>
+                  <span className="gz-coin-label">Coins</span>
+                </div>
+              </div>
+              <div className="gz-discount-badge">
+                {(coins / 100).toFixed(1)}% OFF
+              </div>
+              <button className="gz-coin-history-btn" onClick={() => setShowCoinModal(true)}>
+                View History →
+              </button>
+              <p className="gz-coin-hint">Win games to earn coins!<br/>100 coins = 1% discount</p>
+            </div>
+          </div>
+
+          {/* ─── Active Game or Game Cards ─── */}
+          {activeGame === 'tictactoe' ? (
+            <div className="reveal"><TicTacToe onWin={() => awardCoin('Tic Tac Toe')} onBack={() => setActiveGame(null)} /></div>
+          ) : activeGame === 'rps' ? (
+            <div className="reveal"><RockPaperScissors onWin={() => awardCoin('Rock Paper Scissors')} onBack={() => setActiveGame(null)} /></div>
+          ) : activeGame === 'catcher' ? (
+            <div className="reveal"><FoodCatcher onWin={() => awardCoin('Food Catcher')} onBack={() => setActiveGame(null)} /></div>
+          ) : activeGame === 'memory' ? (
+            <div className="reveal"><MemoryMatch onWin={() => awardCoin('Memory Match')} onBack={() => setActiveGame(null)} /></div>
+          ) : (
+            <div className="gz-game-grid reveal">
+              {gameCards.map(g => (
+                <button key={g.id} className="gz-game-card" onClick={() => setActiveGame(g.id)} style={{ '--gc-color': g.color }}>
+                  <span className="gz-game-emoji">{g.emoji}</span>
+                  <h4>{g.title}</h4>
+                  <p>{g.desc}</p>
+                  <span className="gz-game-play">Play →</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -598,6 +1253,9 @@ export default function Home() {
           <img src="https://ik.imagekit.io/DEMOPROJECT/35392bc6-c7b8-4cd9-9bfc-218e6ba384d3.png" alt="Zorko Jiyanpur" className="footer-banner-img" />
         </div>
       </footer>
+
+      {/* ─── Coin Modal ─── */}
+      {showCoinModal && <CoinModal coins={coins} history={coinHistory} onClose={() => setShowCoinModal(false)} />}
     </>
   );
 }
