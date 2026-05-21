@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { subscribeToPush } from './components/PWAProvider';
 
 // ─── Menu Data ───
 const menuData = {
@@ -238,14 +239,7 @@ const reviews = [
   { name: 'Bandana Singh', initial: 'B', text: 'The taste of the food was really amazing and the quality was top notch. Highly recommended!', stars: 5, source: 'Google Review' },
 ];
 
-// ─── Leaderboard Data (fake + user) ───
-const fakeLeaders = [
-  { name: 'Shashank G.', coins: 42 },
-  { name: 'Nandani', coins: 35 },
-  { name: 'Aryan S.', coins: 28 },
-  { name: 'Pravesh S.', coins: 21 },
-  { name: 'Bandana S.', coins: 15 },
-];
+// ─── Dynamic Leaderboard Integration ───
 
 // ─── Game Constants ───
 const MEMORY_EMOJIS = ['🍔', '🍕', '🌮', '🍟', '🥤', '🧁'];
@@ -782,32 +776,244 @@ export default function Home() {
   const [showCoinModal, setShowCoinModal] = useState(false);
   const [coinCelebrate, setCoinCelebrate] = useState(false);
 
-  // Load from localStorage
+  // Auth and Leaderboard states
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authTab, setAuthTab] = useState('register'); // 'register' or 'login'
+  const [authName, setAuthName] = useState('');
+  const [authPhone, setAuthPhone] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [pendingGame, setPendingGame] = useState(null);
+  const [leaders, setLeaders] = useState([]);
+  const [loadingLeaders, setLoadingLeaders] = useState(true);
+
+  // Loading states
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [gameLoading, setGameLoading] = useState(false);
+  const [loadingGameTitle, setLoadingGameTitle] = useState('');
+  const [coinSyncing, setCoinSyncing] = useState(false);
+
+  // Discounts & push
+  const [siteDiscounts, setSiteDiscounts] = useState([]);
+  const [pushStatus, setPushStatus] = useState('idle'); // 'idle' | 'loading' | 'subscribed' | 'denied'
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  // Helper to launch game with launcher transition
+  const launchGame = (gameId) => {
+    const gameNameMap = {
+      tictactoe: 'Tic Tac Toe',
+      rps: 'Rock Paper Scissors',
+      catcher: 'Food Catcher',
+      memory: 'Memory Match'
+    };
+    setLoadingGameTitle(gameNameMap[gameId] || 'Game');
+    setGameLoading(true);
+    
+    // Smooth scroll to game zone
+    setTimeout(() => {
+      document.getElementById('game-zone')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+
+    setTimeout(() => {
+      setActiveGame(gameId);
+      setGameLoading(false);
+    }, 900);
+  };
+
+  const handlePushSubscribe = async () => {
+    if (pushStatus === 'subscribed') return;
+    setPushStatus('loading');
+    const result = await subscribeToPush();
+    if (result.success) {
+      setPushStatus('subscribed');
+    } else if (result.error?.includes('denied') || result.error?.includes('permission')) {
+      setPushStatus('denied');
+    } else {
+      setPushStatus('idle');
+    }
+  };
+
+  const handleInstallApp = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') { setInstallPrompt(null); setShowInstallBanner(false); }
+  };
+
+  // Fetch real leaderboard
+  const fetchLeaderboard = async () => {
+    try {
+      setLoadingLeaders(true);
+      const res = await fetch('/api/leaderboard');
+      const data = await res.json();
+      if (data.success) {
+        setLeaders(data.leaderboard);
+      }
+    } catch (err) {
+      console.error('Failed to fetch leaderboard:', err);
+    } finally {
+      setLoadingLeaders(false);
+    }
+  };
+
+  // Load user from localStorage and fetch leaderboard
   useEffect(() => {
     try {
-      const savedCoins = localStorage.getItem('zorko_coins');
-      const savedHistory = localStorage.getItem('zorko_coin_history');
-      if (savedCoins) setCoins(parseInt(savedCoins, 10));
-      if (savedHistory) setCoinHistory(JSON.parse(savedHistory));
+      const savedUser = localStorage.getItem('zorko_user');
+      if (savedUser) {
+        const userObj = JSON.parse(savedUser);
+        setCurrentUser(userObj);
+        setCoins(userObj.coins || 0);
+        setCoinHistory(userObj.history || []);
+      } else {
+        setCoins(0);
+        setCoinHistory([]);
+      }
     } catch (e) { /* ignore */ }
+    fetchLeaderboard();
+    setProfileLoading(false);
+
+    // Fetch active discounts for landing page
+    fetch('/api/discounts').then(r => r.json()).then(d => { if (d.success) setSiteDiscounts(d.discounts); }).catch(() => {});
+
+    // Check push notification status
+    if ('Notification' in window) {
+      if (Notification.permission === 'granted') setPushStatus('subscribed');
+      else if (Notification.permission === 'denied') setPushStatus('denied');
+    }
+
+    // PWA install prompt
+    const handleBeforeInstall = (e) => { e.preventDefault(); setInstallPrompt(e); setShowInstallBanner(true); };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
   }, []);
 
-  const awardCoin = (gameName) => {
-    const newCoins = coins + 1;
-    const entry = {
-      game: gameName,
-      amount: 1,
-      date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-    };
-    const newHistory = [...coinHistory, entry];
-    setCoins(newCoins);
-    setCoinHistory(newHistory);
+  const awardCoin = async (gameName) => {
+    if (!currentUser) return;
+
+    setCoinSyncing(true);
+    try {
+      const res = await fetch('/api/user/coins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: currentUser.phone, game: gameName })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCoins(data.user.coins);
+        setCoinHistory(data.user.history);
+        const updatedUser = { ...currentUser, coins: data.user.coins, history: data.user.history };
+        setCurrentUser(updatedUser);
+        try {
+          localStorage.setItem('zorko_user', JSON.stringify(updatedUser));
+          localStorage.setItem('zorko_coins', data.user.coins.toString());
+          localStorage.setItem('zorko_coin_history', JSON.stringify(data.user.history));
+        } catch (e) { /* ignore */ }
+        fetchLeaderboard();
+      }
+    } catch (err) {
+      console.error('Failed to update coins in database:', err);
+      // Fallback
+      const newCoins = coins + 1;
+      const entry = {
+        game: gameName,
+        amount: 1,
+        date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      };
+      const newHistory = [...coinHistory, entry];
+      setCoins(newCoins);
+      setCoinHistory(newHistory);
+      try {
+        localStorage.setItem('zorko_coins', newCoins.toString());
+        localStorage.setItem('zorko_coin_history', JSON.stringify(newHistory));
+      } catch (e) { /* ignore */ }
+    } finally {
+      setCoinSyncing(false);
+    }
+
     setCoinCelebrate(true);
     setTimeout(() => setCoinCelebrate(false), 2000);
+  };
+
+  const handlePlayGame = (gameId) => {
+    if (!currentUser) {
+      setPendingGame(gameId);
+      setAuthTab('register');
+      setAuthError('');
+      setAuthName('');
+      setAuthPhone('');
+      setAuthPassword('');
+      setShowAuthModal(true);
+    } else {
+      launchGame(gameId);
+    }
+  };
+
+  const handleAuthSubmit = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthLoading(true);
+
     try {
-      localStorage.setItem('zorko_coins', newCoins.toString());
-      localStorage.setItem('zorko_coin_history', JSON.stringify(newHistory));
+      const payload = {
+        action: authTab,
+        phone: authPhone,
+        password: authPassword,
+        ...(authTab === 'register' ? { name: authName } : {})
+      };
+
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setAuthError(data.error || 'Authentication failed.');
+        setAuthLoading(false);
+        return;
+      }
+
+      setCurrentUser(data.user);
+      setCoins(data.user.coins);
+      setCoinHistory(data.user.history);
+
+      try {
+        localStorage.setItem('zorko_user', JSON.stringify(data.user));
+        localStorage.setItem('zorko_coins', data.user.coins.toString());
+        localStorage.setItem('zorko_coin_history', JSON.stringify(data.user.history));
+      } catch (e) { /* ignore */ }
+
+      setShowAuthModal(false);
+      setAuthLoading(false);
+
+      if (pendingGame) {
+        launchGame(pendingGame);
+        setPendingGame(null);
+      }
+
+      fetchLeaderboard();
+    } catch (err) {
+      console.error('Auth error:', err);
+      setAuthError('Connection failed. Please check your internet connection.');
+      setAuthLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setCoins(0);
+    setCoinHistory([]);
+    try {
+      localStorage.removeItem('zorko_user');
+      localStorage.removeItem('zorko_coins');
+      localStorage.removeItem('zorko_coin_history');
     } catch (e) { /* ignore */ }
+    fetchLeaderboard();
   };
 
   const scrollCategories = (dir) => {
@@ -841,10 +1047,7 @@ export default function Home() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Build leaderboard
-  const leaderboard = [...fakeLeaders, { name: 'You 🏆', coins }]
-    .sort((a, b) => b.coins - a.coins)
-    .slice(0, 6);
+  // Leaderboard data is fetched dynamically and stored in "leaders" state
 
   const gameCards = [
     { id: 'tictactoe', emoji: '❌', title: 'Tic Tac Toe', desc: 'Beat Zorko Bot', color: '#FF8119' },
@@ -1105,25 +1308,83 @@ export default function Home() {
             <h2 className="section-title">🎮 Zorko<br />Game Zone</h2>
           </div>
 
+          {/* ─── User Session Profile Bar ─── */}
+          <div className="gz-profile-bar reveal">
+            {profileLoading ? (
+              <div className="gz-profile-info gz-profile-skeleton skeleton-shimmer">
+                <div className="gz-profile-welcome-skeleton"></div>
+                <div className="gz-profile-btn-skeleton"></div>
+              </div>
+            ) : currentUser ? (
+              <div className="gz-profile-info">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span className="gz-profile-welcome">👋 Welcome, <span className="gz-profile-name">{currentUser.name}</span>!</span>
+                  {currentUser.uid && <span style={{ fontSize: '11px', color: '#FF8119', fontWeight: 700, opacity: 0.8 }}>🆔 UID: {currentUser.uid}</span>}
+                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={handlePushSubscribe}
+                    title={pushStatus === 'subscribed' ? 'Notifications enabled!' : pushStatus === 'denied' ? 'Notifications blocked in browser settings' : 'Enable offer notifications'}
+                    style={{ background: pushStatus === 'subscribed' ? 'rgba(34,197,94,0.15)' : 'rgba(255,129,25,0.12)', border: `1px solid ${pushStatus === 'subscribed' ? 'rgba(34,197,94,0.3)' : 'rgba(255,129,25,0.25)'}`, color: pushStatus === 'subscribed' ? '#22C55E' : '#FF8119', borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: 700, cursor: pushStatus === 'subscribed' ? 'default' : 'pointer' }}
+                    disabled={pushStatus === 'loading' || pushStatus === 'denied'}
+                  >
+                    {pushStatus === 'subscribed' ? '🔔 Notified' : pushStatus === 'loading' ? '⏳...' : pushStatus === 'denied' ? '🔕 Blocked' : '🔔 Offers'}
+                  </button>
+                  <button className="gz-profile-logout" onClick={handleLogout}>Log Out</button>
+                </div>
+              </div>
+            ) : (
+              <div className="gz-profile-info anonymous">
+                <span>Play games to earn discount coins!</span>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button onClick={handlePushSubscribe} style={{ background: 'rgba(255,129,25,0.12)', border: '1px solid rgba(255,129,25,0.25)', color: '#FF8119', borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }} disabled={pushStatus === 'loading' || pushStatus === 'denied'}>
+                    {pushStatus === 'subscribed' ? '🔔 Offers Enabled' : pushStatus === 'denied' ? '🔕 Blocked' : '🔔 Enable Offers'}
+                  </button>
+                  <button className="gz-profile-login-btn" onClick={() => { setAuthTab('login'); setShowAuthModal(true); }}>
+                    Log In / Register
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* ─── Leaderboard + Coins Bar ─── */}
           <div className="gz-top-bar reveal">
             <div className="gz-leaderboard">
               <h4>🏆 Leaderboard</h4>
               <div className="gz-lb-list">
-                {leaderboard.map((p, i) => (
-                  <div key={i} className={`gz-lb-item ${p.name.includes('You') ? 'gz-lb-you' : ''}`}>
-                    <span className="gz-lb-rank">{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</span>
-                    <span className="gz-lb-name">{p.name}</span>
-                    <span className="gz-lb-coins">{p.coins} 🪙</span>
-                  </div>
-                ))}
+                {loadingLeaders ? (
+                  Array.from({ length: 5 }).map((_, idx) => (
+                    <div key={idx} className="gz-lb-item-skeleton skeleton-shimmer">
+                      <span className="gz-lb-rank-skeleton"></span>
+                      <span className="gz-lb-name-skeleton"></span>
+                      <span className="gz-lb-coins-skeleton"></span>
+                    </div>
+                  ))
+                ) : leaders.length === 0 ? (
+                  <div className="gz-lb-empty">No players yet. Be the first!</div>
+                ) : (
+                  leaders.map((p, i) => {
+                    const isYou = currentUser && p.name === currentUser.name;
+                    return (
+                      <div key={i} className={`gz-lb-item ${isYou ? 'gz-lb-you' : ''}`}>
+                        <span className="gz-lb-rank">{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</span>
+                        <span className="gz-lb-name">{p.name} {isYou && '🏆 (You)'}</span>
+                        <span className="gz-lb-coins">{p.coins} 🪙</span>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
             <div className="gz-coin-widget">
               <div className="gz-coin-display" onClick={() => setShowCoinModal(true)}>
                 <div className="gz-coin-icon">🪙</div>
                 <div className="gz-coin-info">
-                  <span className="gz-coin-count">{coins}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="gz-coin-count">{coins}</span>
+                    {coinSyncing && <span className="gz-coin-sync-spinner"></span>}
+                  </div>
                   <span className="gz-coin-label">Coins</span>
                 </div>
               </div>
@@ -1138,7 +1399,18 @@ export default function Home() {
           </div>
 
           {/* ─── Active Game or Game Cards ─── */}
-          {activeGame === 'tictactoe' ? (
+          {gameLoading ? (
+            <div className="gz-launcher-container reveal visible">
+              <div className="gz-launcher-card">
+                <span className="gz-launcher-icon">🎮</span>
+                <h4>Launching {loadingGameTitle}...</h4>
+                <p>Initializing retro engine & syncing with kitchen leaderboard...</p>
+                <div className="gz-launcher-bar">
+                  <div className="gz-launcher-bar-fill"></div>
+                </div>
+              </div>
+            </div>
+          ) : activeGame === 'tictactoe' ? (
             <div className="reveal"><TicTacToe onWin={() => awardCoin('Tic Tac Toe')} onBack={() => setActiveGame(null)} /></div>
           ) : activeGame === 'rps' ? (
             <div className="reveal"><RockPaperScissors onWin={() => awardCoin('Rock Paper Scissors')} onBack={() => setActiveGame(null)} /></div>
@@ -1149,7 +1421,7 @@ export default function Home() {
           ) : (
             <div className="gz-game-grid reveal">
               {gameCards.map(g => (
-                <button key={g.id} className="gz-game-card" onClick={() => setActiveGame(g.id)} style={{ '--gc-color': g.color }}>
+                <button key={g.id} className="gz-game-card" onClick={() => handlePlayGame(g.id)} style={{ '--gc-color': g.color }}>
                   <span className="gz-game-emoji">{g.emoji}</span>
                   <h4>{g.title}</h4>
                   <p>{g.desc}</p>
@@ -1209,6 +1481,31 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ─── Discounts Section ─── */}
+      {siteDiscounts.length > 0 && (
+        <section className="discounts-section">
+          <div className="container reveal">
+            <div className="section-header">
+              <span className="section-label">🔥 Hot Offers</span>
+              <h2>Latest <em className="em">Discounts</em></h2>
+              <p>Check out our freshest deals — collect coins in Game Zone to unlock more!</p>
+            </div>
+            <div className="discounts-grid">
+              {siteDiscounts.map((d) => (
+                <div key={d._id} className="discount-card" style={{ '--discount-color': d.color || '#FF8119' }}>
+                  <div className="discount-badge-icon">{d.badge || '🎉'}</div>
+                  <div className="discount-content">
+                    <h3 className="discount-title">{d.title}</h3>
+                    {d.description && <p className="discount-desc">{d.description}</p>}
+                  </div>
+                  <div className="discount-shine"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ─── CTA ─── */}
       <section className="cta-section">
         <div className="container reveal">
@@ -1256,6 +1553,108 @@ export default function Home() {
 
       {/* ─── Coin Modal ─── */}
       {showCoinModal && <CoinModal coins={coins} history={coinHistory} onClose={() => setShowCoinModal(false)} />}
+
+      {/* ─── Auth Modal (Register/Login) ─── */}
+      {showAuthModal && (
+        <div className="auth-modal-overlay" onClick={() => { !authLoading && setShowAuthModal(false); !authLoading && setPendingGame(null); }}>
+          <div className="auth-modal" onClick={e => e.stopPropagation()}>
+            {!authLoading && (
+              <button className="auth-modal-close" onClick={() => { setShowAuthModal(false); setPendingGame(null); }}>✕</button>
+            )}
+
+            {authLoading ? (
+              <div className="auth-loading-screen">
+                <div className="auth-loading-spinner"></div>
+                <h4>Connecting to Game Zone...</h4>
+                <p>Verifying credentials & syncing with live player database. Please wait...</p>
+              </div>
+            ) : (
+              <>
+                <div className="auth-modal-header">
+                  <div className="auth-modal-icon">🎮</div>
+                  <h3>Zorko Game Zone</h3>
+                  <p>Register or Login to play and earn discount coins!</p>
+                </div>
+
+                <div className="auth-tabs">
+                  <button
+                    className={`auth-tab-btn ${authTab === 'register' ? 'active' : ''}`}
+                    type="button"
+                    onClick={() => { setAuthTab('register'); setAuthError(''); }}
+                  >
+                    New Player
+                  </button>
+                  <button
+                    className={`auth-tab-btn ${authTab === 'login' ? 'active' : ''}`}
+                    type="button"
+                    onClick={() => { setAuthTab('login'); setAuthError(''); }}
+                  >
+                    Already Registered
+                  </button>
+                </div>
+
+                {authError && <div className="auth-error-msg">{authError}</div>}
+
+                <form onSubmit={handleAuthSubmit} className="auth-form">
+                  {authTab === 'register' && (
+                    <div className="auth-input-group">
+                      <label>Full Name</label>
+                      <input
+                        type="text"
+                        placeholder="Enter your name"
+                        value={authName}
+                        onChange={e => setAuthName(e.target.value)}
+                        required
+                      />
+                    </div>
+                  )}
+
+                  <div className="auth-input-group">
+                    <label>Phone Number</label>
+                    <input
+                      type="tel"
+                      placeholder="Enter 10-digit mobile number"
+                      value={authPhone}
+                      onChange={e => setAuthPhone(e.target.value)}
+                      pattern="[0-9]{10}"
+                      required
+                    />
+                  </div>
+
+                  <div className="auth-input-group">
+                    <label>Password</label>
+                    <input
+                      type="password"
+                      placeholder="Enter password"
+                      value={authPassword}
+                      onChange={e => setAuthPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <button type="submit" className="auth-submit-btn" disabled={authLoading}>
+                    {authTab === 'register' ? 'Register & Play' : 'Login & Play'}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+      {/* ─── PWA Install Banner ─── */}
+      {showInstallBanner && (
+        <div className="pwa-install-banner">
+          <div className="pwa-install-content">
+            <span className="pwa-install-icon">🍔</span>
+            <div className="pwa-install-text">
+              <strong>Install Zorko App!</strong>
+              <span>Add to home screen for offline menu & quick access</span>
+            </div>
+            <button onClick={handleInstallApp} className="pwa-install-btn">Install</button>
+            <button onClick={() => setShowInstallBanner(false)} className="pwa-install-close">✕</button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -1,0 +1,37 @@
+{
+  "name": "Zorko Jiyanpur",
+  "short_name": "Zorko",
+  "description": "Brand of Food Lovers — Burgers, Mojitos, Pizza & More at Jiyanpur!",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F9F5F0",
+  "theme_color": "#FF8119",
+  "orientation": "portrait-primary",
+  "lang": "en-IN",
+  "categories": ["food", "lifestyle", "shopping"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "https://ik.imagekit.io/DEMOPROJECT/b9e93af6-869f-444a-9940-7d87a43b6b45.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://ik.imagekit.io/DEMOPROJECT/b9e93af6-869f-444a-9940-7d87a43b6b45.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://ik.imagekit.io/DEMOPROJECT/b9e93af6-869f-444a-9940-7d87a43b6b45.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Zorko Jiyanpur Menu"
+    }
+  ]
+}

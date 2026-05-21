@@ -1,6 +1,7 @@
 /* app/layout.js */
 import './globals.css';
 import { Analytics } from '@vercel/analytics/react';
+import PWAProvider from './components/PWAProvider';
 
 export const metadata = {
   metadataBase: new URL('https://zorkojiyanpur.vercel.app'),
@@ -55,6 +56,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Zorko" />
+        <meta name="application-name" content="Zorko Jiyanpur" />
+        <link rel="apple-touch-icon" href="https://ik.imagekit.io/DEMOPROJECT/b9e93af6-869f-444a-9940-7d87a43b6b45.png" />
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <script
           type="application/ld+json"
@@ -126,6 +134,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body suppressHydrationWarning>
+        <PWAProvider />
         {children}
         <Analytics />
       </body>
