@@ -1248,7 +1248,7 @@ export default function Home() {
           <div className="student-card reveal">
             <div className="offer-badge">🎓 STUDENT EXCLUSIVE</div>
             <h2><span className="big">15% OFF</span><br />For All Students</h2>
-            <p>Show your college ID and get instant discount on every order. Because great food shouldn&apos;t break the bank.</p>
+            <p>Show your school ID with dress and get instant discount on every order. Because great food shouldn&apos;t break the bank.</p>
             <button onClick={() => scrollToSection('location')} className="btn-primary">
               Claim Now
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
