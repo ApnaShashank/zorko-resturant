@@ -800,12 +800,13 @@ export default function Home() {
               </div>
 
               {/* Floating Burger */}
-              <div className="floating-food-item food-bob-1" style={{ top: '80px', left: '10px' }}>
+              <div className="floating-food-item food-bob-1" style={{ top: '60px', left: '10px' }}>
                 <div style={{ position: 'relative' }}>
                   <img
                     src="/images/food/burger.webp"
                     alt="Zorko Mexican King Burger"
-                    style={{ width: '220px', height: '220px' }}
+                    className="hero-food-burger"
+                    style={{ objectFit: 'contain' }}
                   />
                   <div style={{ position: 'absolute', top: '-10px', left: '-10px' }}>
                     <BestsellerBadge />
@@ -814,12 +815,13 @@ export default function Home() {
               </div>
 
               {/* Floating Pizza */}
-              <div className="floating-food-item food-bob-2" style={{ bottom: '20px', right: '30px' }}>
+              <div className="floating-food-item food-bob-2" style={{ bottom: '15px', right: '20px' }}>
                 <div style={{ position: 'relative' }}>
                   <img
                     src="/images/food/pizza.webp"
                     alt="Zorko Veg Exotica Pizza"
-                    style={{ width: '210px', height: '210px' }}
+                    className="hero-food-pizza"
+                    style={{ objectFit: 'contain' }}
                   />
                   <div style={{ position: 'absolute', bottom: '-10px', right: '-10px' }}>
                     <MustTryBadge />
@@ -828,11 +830,12 @@ export default function Home() {
               </div>
 
               {/* Floating Blue Mojito */}
-              <div className="floating-food-item food-bob-3" style={{ bottom: '110px', left: '130px' }}>
+              <div className="floating-food-item food-bob-3" style={{ bottom: '80px', left: '110px' }}>
                 <img
                   src="/images/food/blue-mojito.webp"
                   alt="Zorko Blue Heaven Mojito"
-                  style={{ width: '130px', height: '170px' }}
+                  className="hero-food-mojito"
+                  style={{ objectFit: 'contain' }}
                 />
               </div>
             </div>

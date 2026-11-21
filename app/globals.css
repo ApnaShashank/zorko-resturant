@@ -45,6 +45,7 @@ html {
   font-size: 16px;
   background-color: var(--bg-cream);
   color: var(--ink);
+  overflow-x: hidden;
 }
 
 body {
@@ -53,6 +54,7 @@ body {
   color: var(--ink);
   line-height: 1.5;
   overflow-x: hidden;
+  max-width: 100vw;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -396,18 +398,19 @@ section {
 }
 .hero-title {
   font-family: var(--font-display);
-  font-size: 64px;
+  font-size: clamp(32px, 6.5vw, 64px);
   font-weight: 800;
-  line-height: 0.95;
+  line-height: 0.98;
   text-transform: uppercase;
   letter-spacing: -0.03em;
   color: var(--ink);
   margin-bottom: 18px;
+  word-break: break-word;
 }
 @media (max-width: 640px) {
   .hero-title {
-    font-size: 40px;
-    line-height: 1.0;
+    font-size: clamp(28px, 8.5vw, 42px);
+    line-height: 1.05;
   }
 }
 .hero-subline {
@@ -442,10 +445,11 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
+  max-width: 100%;
 }
 @media (max-width: 640px) {
   .hero-visual-stage {
-    height: 340px;
+    height: 310px;
   }
 }
 .hero-blob-bg {
@@ -460,8 +464,35 @@ section {
 }
 @media (max-width: 640px) {
   .hero-blob-bg {
-    width: 280px;
-    height: 280px;
+    width: 250px;
+    height: 250px;
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+}
+.hero-food-burger {
+  width: 220px;
+  height: 220px;
+}
+.hero-food-pizza {
+  width: 210px;
+  height: 210px;
+}
+.hero-food-mojito {
+  width: 130px;
+  height: 170px;
+}
+@media (max-width: 640px) {
+  .hero-food-burger {
+    width: 145px;
+    height: 145px;
+  }
+  .hero-food-pizza {
+    width: 135px;
+    height: 135px;
+  }
+  .hero-food-mojito {
+    width: 85px;
+    height: 115px;
   }
 }
 .floating-food-item {
@@ -767,7 +798,7 @@ section {
 }
 .menu-grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: 20px;
 }
 .menu-item-row {
@@ -1135,6 +1166,9 @@ section {
 @media (max-width: 520px) {
   .game-cards-row {
     grid-template-columns: 1fr;
+  }
+  .game-select-card {
+    grid-column: span 1 !important;
   }
 }
 .game-select-card {
