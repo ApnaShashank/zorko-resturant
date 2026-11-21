@@ -517,6 +517,59 @@ export default function Home() {
   const [loadingLeaders, setLoadingLeaders] = useState(false);
   const [coinCelebrate, setCoinCelebrate] = useState(false);
 
+  // Delivery Poll state
+  const [pollVoted, setPollVoted] = useState(false);
+  const [pollSubmitting, setPollSubmitting] = useState(false);
+  const [pollStats, setPollStats] = useState({ yesCount: 0, noCount: 0, total: 0 });
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('zorko_delivery_poll_voted');
+      if (saved) setPollVoted(saved);
+    } catch (e) {}
+
+    fetch('/api/delivery-poll')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.success) {
+          setPollStats({
+            yesCount: data.yesCount || 0,
+            noCount: data.noCount || 0,
+            total: data.total || 0,
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handlePollVote = async (choice) => {
+    if (pollSubmitting) return;
+    setPollSubmitting(true);
+    try {
+      const res = await fetch('/api/delivery-poll', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vote: choice }),
+      });
+      const data = await res.json();
+      if (data?.success) {
+        setPollStats({
+          yesCount: data.yesCount || 0,
+          noCount: data.noCount || 0,
+          total: data.total || 0,
+        });
+      }
+      setPollVoted(choice);
+      try {
+        localStorage.setItem('zorko_delivery_poll_voted', choice);
+      } catch (e) {}
+    } catch (err) {
+      setPollVoted(choice);
+    } finally {
+      setPollSubmitting(false);
+    }
+  };
+
   // Scroll detection
   useEffect(() => {
     const handleScroll = () => {
@@ -1791,8 +1844,8 @@ export default function Home() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', marginTop: '6px' }}>
-                <a href={TEL_LINK} className="btn-pill btn-pill-orange" style={{ flex: 1 }}>
+              <div className="visitus-actions">
+                <a href={TEL_LINK} className="btn-pill btn-pill-orange">
                   <Phone size={18} strokeWidth={1.8} />
                   <span>Call Karein</span>
                 </a>
@@ -1801,7 +1854,6 @@ export default function Home() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-pill btn-pill-ink"
-                  style={{ flex: 1 }}
                 >
                   <ExternalLink size={18} strokeWidth={1.8} />
                   <span>Get Directions</span>
@@ -1818,6 +1870,64 @@ export default function Home() {
                 allowFullScreen
               />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Delivery Need Poll Card (Right Above Footer) ── */}
+      <section className="delivery-poll-section">
+        <div className="container">
+          <div className="delivery-poll-card">
+            <div className="delivery-poll-header">
+              <span className="poll-badge-chip">
+                🛵 Community Feedback
+              </span>
+              <h3 className="poll-title">
+                Kya aapko Zorko Jiyanpur me Home Delivery ki zaroorat hai?
+              </h3>
+              <p className="poll-subtitle">
+                Humein apna response dein! Aapke votes ke aadhar par hum delivery service par decision lenge.
+              </p>
+            </div>
+
+            {!pollVoted ? (
+              <div className="poll-actions-wrap">
+                <button
+                  onClick={() => handlePollVote('yes')}
+                  disabled={pollSubmitting}
+                  className="btn-pill btn-pill-orange poll-btn"
+                >
+                  <span>👍 Haan, Delivery Chahiye (Yes)</span>
+                </button>
+                <button
+                  onClick={() => handlePollVote('no')}
+                  disabled={pollSubmitting}
+                  className="btn-pill btn-pill-ink poll-btn"
+                >
+                  <span>☕ Nahi, Café Aana Pasand Hai (No)</span>
+                </button>
+              </div>
+            ) : (
+              <div className="poll-result-wrap">
+                <div className="poll-thanks-badge">
+                  🎉 Dhanyawaad! Aapka response database me save ho gaya hai!
+                </div>
+                {pollStats.total > 0 && (
+                  <div className="poll-bar-container">
+                    <div className="poll-stats-row">
+                      <span>👍 Haan: {Math.round((pollStats.yesCount / pollStats.total) * 100)}% ({pollStats.yesCount})</span>
+                      <span>☕ Nahi: {Math.round((pollStats.noCount / pollStats.total) * 100)}% ({pollStats.noCount})</span>
+                    </div>
+                    <div className="poll-progress-track">
+                      <div
+                        className="poll-progress-fill"
+                        style={{ width: `${Math.round((pollStats.yesCount / pollStats.total) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </section>
