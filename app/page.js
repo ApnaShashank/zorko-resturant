@@ -34,7 +34,8 @@ import {
   ThumbsUpDoodle,
   RotatingLogoBadge,
   WavyDivider,
-  InstagramIcon as Instagram
+  InstagramIcon as Instagram,
+  NamasteSymbol
 } from './components/Stickers';
 
 // ─── Locked Official Logo ───
@@ -792,7 +793,9 @@ export default function Home() {
 
             {/* Right Column: Floating Cut-Out Photos & Rotating Badge */}
             <div className="hero-visual-stage">
-              <div className="hero-blob-bg" />
+              <div className="hero-blob-bg">
+                <NamasteSymbol className="hero-blob-namaste" />
+              </div>
 
               {/* Rotating Circular Text Badge around official logo */}
               <div className="hero-rotating-badge-wrap">

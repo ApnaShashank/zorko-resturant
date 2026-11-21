@@ -293,3 +293,93 @@ export function WavyDivider({
     </div>
   );
 }
+
+export function NamasteSymbol({ size = 220, color = '#211712', opacity = 0.32, className = '' }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 120 130"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={{ opacity, pointerEvents: 'none' }}
+    >
+      {/* Radiant Welcome Rays */}
+      <g stroke={color} strokeWidth="2.5" strokeLinecap="round" opacity="0.75">
+        <line x1="60" y1="8" x2="60" y2="16" />
+        <line x1="42" y1="13" x2="47" y2="20" />
+        <line x1="78" y1="13" x2="73" y2="20" />
+        <line x1="27" y1="26" x2="33" y2="32" />
+        <line x1="93" y1="26" x2="87" y2="32" />
+      </g>
+
+      {/* Decorative Sparkle Stars */}
+      <path
+        d="M20 54 Q20 48 17 45 Q20 42 20 36 Q20 42 23 45 Q20 48 20 54 Z"
+        fill={color}
+        opacity="0.6"
+      />
+      <path
+        d="M100 54 Q100 48 97 45 Q100 42 100 36 Q100 42 103 45 Q100 48 100 54 Z"
+        fill={color}
+        opacity="0.6"
+      />
+
+      {/* Folded Hands (Anjali Mudra / Pranam) */}
+      <g stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none">
+        {/* Left hand contour */}
+        <path d="M60 22 C53 26 46 36 44 48 C42 58 42 66 45 74 C47 78 45 84 45 92" />
+        
+        {/* Right hand contour */}
+        <path d="M60 22 C67 26 74 36 76 48 C78 58 78 66 75 74 C73 78 75 84 75 92" />
+
+        {/* Center seam between palms */}
+        <path d="M60 23 L60 92" strokeWidth="1.8" strokeDasharray="3 2" />
+
+        {/* Thumbs */}
+        <path d="M45 66 C48 66 52 69 55 74" strokeWidth="2" />
+        <path d="M75 66 C72 66 68 69 65 74" strokeWidth="2" />
+
+        {/* Finger crease details left */}
+        <path d="M48 48 C51 49 55 52 57 56" strokeWidth="1.6" opacity="0.8" />
+        <path d="M50 38 C53 40 56 43 58 46" strokeWidth="1.6" opacity="0.8" />
+
+        {/* Finger crease details right */}
+        <path d="M72 48 C69 49 65 52 63 56" strokeWidth="1.6" opacity="0.8" />
+        <path d="M70 38 C67 40 64 43 62 46" strokeWidth="1.6" opacity="0.8" />
+
+        {/* Wrist bands / cuffs */}
+        <path d="M42 92 C50 94 70 94 78 92" strokeWidth="2.5" />
+        <path d="M44 97 C50 99 70 99 76 97" strokeWidth="2" opacity="0.75" />
+      </g>
+
+      {/* Traditional "नमस्ते" Typography */}
+      <text
+        x="60"
+        y="114"
+        textAnchor="middle"
+        fill={color}
+        fontSize="13"
+        fontWeight="800"
+        fontFamily="inherit"
+        letterSpacing="2"
+      >
+        नमस्ते
+      </text>
+
+      <text
+        x="60"
+        y="126"
+        textAnchor="middle"
+        fill={color}
+        fontSize="7.5"
+        fontWeight="800"
+        letterSpacing="2"
+        opacity="0.85"
+      >
+        SWAGATAM
+      </text>
+    </svg>
+  );
+}
