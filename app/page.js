@@ -795,12 +795,12 @@ export default function Home() {
               <div className="hero-blob-bg" />
 
               {/* Rotating Circular Text Badge around official logo */}
-              <div style={{ position: 'absolute', top: '0px', right: '10px', zIndex: 10 }}>
+              <div className="hero-rotating-badge-wrap">
                 <RotatingLogoBadge logoSrc={OFFICIAL_LOGO} size={150} />
               </div>
 
               {/* Floating Burger */}
-              <div className="floating-food-item food-bob-1" style={{ top: '60px', left: '10px' }}>
+              <div className="floating-food-item food-bob-1 hero-food-pos-burger">
                 <div style={{ position: 'relative' }}>
                   <img
                     src="/images/food/burger.webp"
@@ -815,7 +815,7 @@ export default function Home() {
               </div>
 
               {/* Floating Pizza */}
-              <div className="floating-food-item food-bob-2" style={{ bottom: '15px', right: '20px' }}>
+              <div className="floating-food-item food-bob-2 hero-food-pos-pizza">
                 <div style={{ position: 'relative' }}>
                   <img
                     src="/images/food/pizza.webp"
@@ -830,7 +830,7 @@ export default function Home() {
               </div>
 
               {/* Floating Blue Mojito */}
-              <div className="floating-food-item food-bob-3" style={{ bottom: '80px', left: '110px' }}>
+              <div className="floating-food-item food-bob-3 hero-food-pos-mojito">
                 <img
                   src="/images/food/blue-mojito.webp"
                   alt="Zorko Blue Heaven Mojito"

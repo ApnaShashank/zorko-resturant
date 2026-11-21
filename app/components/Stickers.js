@@ -183,14 +183,14 @@ export function ThumbsUpDoodle({ size = 24, color = "#00A0E3" }) {
   );
 }
 
-export function RotatingLogoBadge({ logoSrc, size = 160 }) {
+export function RotatingLogoBadge({ logoSrc, size = 150, className = '' }) {
   return (
     <div
-      className="rotating-badge-container"
+      className={`rotating-badge-container ${className}`}
       style={{
         position: 'relative',
-        width: `${size}px`,
-        height: `${size}px`,
+        width: `var(--badge-size, ${size}px)`,
+        height: `var(--badge-size, ${size}px)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -232,12 +232,12 @@ export function RotatingLogoBadge({ logoSrc, size = 160 }) {
       {/* Center circle with official logo */}
       <div
         style={{
-          width: `${size * 0.62}px`,
-          height: `${size * 0.62}px`,
+          width: '62%',
+          height: '62%',
           borderRadius: '50%',
           backgroundColor: '#FFFFFF',
           border: '3px solid #211712',
-          boxShadow: '4px 4px 0 #211712',
+          boxShadow: '3px 3px 0 #211712',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

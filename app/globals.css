@@ -437,6 +437,27 @@ section {
     justify-content: center;
   }
 }
+@media (max-width: 640px) {
+  .hero-ctas {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+  .hero-ctas .btn-pill {
+    flex: 1 1 50%;
+    min-width: 0;
+    padding: 11px 8px;
+    font-size: 13px;
+    white-space: nowrap;
+    gap: 5px;
+  }
+}
 
 /* ── Hero Food Visual Collage ── */
 .hero-visual-stage {
@@ -449,7 +470,12 @@ section {
 }
 @media (max-width: 640px) {
   .hero-visual-stage {
-    height: 310px;
+    height: 330px;
+    width: 100%;
+    max-width: 350px;
+    margin: 8px auto 0;
+    position: relative;
+    overflow: visible;
   }
 }
 .hero-blob-bg {
@@ -466,7 +492,10 @@ section {
   .hero-blob-bg {
     width: 250px;
     height: 250px;
-    box-shadow: 5px 5px 0 var(--ink);
+    box-shadow: 6px 6px 0 var(--ink);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 }
 .hero-food-burger {
@@ -483,16 +512,56 @@ section {
 }
 @media (max-width: 640px) {
   .hero-food-burger {
-    width: 145px;
-    height: 145px;
+    width: 140px;
+    height: 140px;
   }
   .hero-food-pizza {
-    width: 135px;
-    height: 135px;
+    width: 130px;
+    height: 130px;
   }
   .hero-food-mojito {
-    width: 85px;
-    height: 115px;
+    width: 76px;
+    height: 110px;
+  }
+}
+.hero-rotating-badge-wrap {
+  position: absolute;
+  top: 0px;
+  right: 10px;
+  z-index: 10;
+}
+@media (max-width: 640px) {
+  .hero-rotating-badge-wrap {
+    top: 0px;
+    right: 4px;
+    --badge-size: 92px;
+    transform: none;
+  }
+}
+.hero-food-pos-burger {
+  top: 60px;
+  left: 10px;
+}
+.hero-food-pos-pizza {
+  bottom: 15px;
+  right: 20px;
+}
+.hero-food-pos-mojito {
+  bottom: 80px;
+  left: 110px;
+}
+@media (max-width: 640px) {
+  .hero-food-pos-burger {
+    top: 36px;
+    left: 12px;
+  }
+  .hero-food-pos-pizza {
+    bottom: 12px;
+    right: 10px;
+  }
+  .hero-food-pos-mojito {
+    bottom: 24px;
+    left: 16px;
   }
 }
 .floating-food-item {
@@ -516,16 +585,16 @@ section {
   animation: bobAnim3 6s ease-in-out infinite 1.5s;
 }
 @keyframes bobAnim1 {
-  0%, 100% { transform: translateY(0) rotate(-6deg); }
-  50% { transform: translateY(-8px) rotate(-4deg); }
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-6px) rotate(-2deg); }
 }
 @keyframes bobAnim2 {
-  0%, 100% { transform: translateY(0) rotate(8deg); }
-  50% { transform: translateY(-10px) rotate(10deg); }
+  0%, 100% { transform: translateY(0) rotate(6deg); }
+  50% { transform: translateY(-7px) rotate(8deg); }
 }
 @keyframes bobAnim3 {
-  0%, 100% { transform: translateY(0) rotate(-10deg); }
-  50% { transform: translateY(-7px) rotate(-8deg); }
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-5px) rotate(-4deg); }
 }
 
 @keyframes spinRing {
@@ -761,13 +830,33 @@ section {
   background-color: var(--bg-cream);
   padding: 80px 0;
 }
+/* ── Menu Category Chips Bar ── */
 .menu-category-chips-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
+}
+@media (max-width: 768px) {
+  .menu-category-chips-wrap {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 4px 16px 14px;
+    margin: 0 -16px 24px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .menu-category-chips-wrap::-webkit-scrollbar {
+    display: none;
+  }
+  .menu-cat-chip {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    font-size: 13px;
+  }
 }
 .menu-cat-chip {
   display: inline-flex;
@@ -932,11 +1021,26 @@ section {
 @media (max-width: 1024px) {
   .gallery-polaroid-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 }
 @media (max-width: 560px) {
   .gallery-polaroid-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .polaroid-card {
+    padding: 8px 8px 14px;
+    border-radius: 10px;
+  }
+  .polaroid-img-wrap {
+    height: 140px;
+    margin-bottom: 8px;
+  }
+  .polaroid-caption {
+    font-size: 15px;
+    line-height: 1.1;
   }
 }
 .polaroid-card {

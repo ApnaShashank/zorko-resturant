@@ -323,11 +323,11 @@ export default function MenuPage() {
         </div>
 
         {/* Category Filter Chips */}
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '14px', marginBottom: '32px', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
           <button
             onClick={() => setSelectedCat('all')}
             className={`btn-pill ${selectedCat === 'all' ? 'btn-pill-orange' : 'btn-pill-cream'}`}
-            style={{ minHeight: '36px', padding: '6px 16px', fontSize: '13px' }}
+            style={{ minHeight: '36px', padding: '6px 16px', fontSize: '13px', flexShrink: 0 }}
           >
             All Categories
           </button>
@@ -336,7 +336,7 @@ export default function MenuPage() {
               key={catKey}
               onClick={() => setSelectedCat(catKey)}
               className={`btn-pill ${selectedCat === catKey ? 'btn-pill-orange' : 'btn-pill-cream'}`}
-              style={{ minHeight: '36px', padding: '6px 16px', fontSize: '13px', whiteSpace: 'nowrap' }}
+              style={{ minHeight: '36px', padding: '6px 16px', fontSize: '13px', whiteSpace: 'nowrap', flexShrink: 0 }}
             >
               {menuData[catKey].title}
             </button>
