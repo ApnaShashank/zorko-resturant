@@ -703,7 +703,7 @@ export default function AdminPage() {
                     </div>
                   ))}
                   <div style={{ marginTop: '16px', fontSize: '13px', opacity: 0.7 }}>
-                    Customer&apos;s {rResult.prevCoins} coins have been cleared. Give them {rResult.discountPct}% discount on their order!
+                    Customer&apos;s {rResult.prevCoins} coins have been cleared. Give them {rResult.discountPct}% discount on their bill!
                   </div>
                   <button onClick={() => { setRResult(null); setRName(''); setRUID(''); }} style={{ ...S.btn(C.green, 'rgba(34,197,94,0.15)'), marginTop: '16px', width: '100%', justifyContent: 'center', padding: '10px', borderRadius: '10px' }}>
                     ✓ Done — Redeem Another
