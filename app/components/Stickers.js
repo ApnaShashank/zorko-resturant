@@ -294,92 +294,135 @@ export function WavyDivider({
   );
 }
 
-export function NamasteSymbol({ size = 220, color = '#211712', opacity = 0.32, className = '' }) {
+export function NamasteSymbol({ size = 220, className = '' }) {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 120 130"
+      viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      style={{ opacity, pointerEvents: 'none' }}
+      style={{ pointerEvents: 'none', overflow: 'visible' }}
     >
-      {/* Radiant Welcome Rays */}
-      <g stroke={color} strokeWidth="2.5" strokeLinecap="round" opacity="0.75">
-        <line x1="60" y1="8" x2="60" y2="16" />
-        <line x1="42" y1="13" x2="47" y2="20" />
-        <line x1="78" y1="13" x2="73" y2="20" />
-        <line x1="27" y1="26" x2="33" y2="32" />
-        <line x1="93" y1="26" x2="87" y2="32" />
-      </g>
-
-      {/* Decorative Sparkle Stars */}
-      <path
-        d="M20 54 Q20 48 17 45 Q20 42 20 36 Q20 42 23 45 Q20 48 20 54 Z"
-        fill={color}
-        opacity="0.6"
-      />
-      <path
-        d="M100 54 Q100 48 97 45 Q100 42 100 36 Q100 42 103 45 Q100 48 100 54 Z"
-        fill={color}
-        opacity="0.6"
+      {/* Warm Glow Circular Halo */}
+      <circle
+        cx="50"
+        cy="44"
+        r="36"
+        fill="#FFF0D6"
+        stroke="#EE7F1A"
+        strokeWidth="1.8"
+        strokeDasharray="3.5 3.5"
       />
 
-      {/* Folded Hands (Anjali Mudra / Pranam) */}
-      <g stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none">
-        {/* Left hand contour */}
-        <path d="M60 22 C53 26 46 36 44 48 C42 58 42 66 45 74 C47 78 45 84 45 92" />
-        
-        {/* Right hand contour */}
-        <path d="M60 22 C67 26 74 36 76 48 C78 58 78 66 75 74 C73 78 75 84 75 92" />
-
-        {/* Center seam between palms */}
-        <path d="M60 23 L60 92" strokeWidth="1.8" strokeDasharray="3 2" />
-
-        {/* Thumbs */}
-        <path d="M45 66 C48 66 52 69 55 74" strokeWidth="2" />
-        <path d="M75 66 C72 66 68 69 65 74" strokeWidth="2" />
-
-        {/* Finger crease details left */}
-        <path d="M48 48 C51 49 55 52 57 56" strokeWidth="1.6" opacity="0.8" />
-        <path d="M50 38 C53 40 56 43 58 46" strokeWidth="1.6" opacity="0.8" />
-
-        {/* Finger crease details right */}
-        <path d="M72 48 C69 49 65 52 63 56" strokeWidth="1.6" opacity="0.8" />
-        <path d="M70 38 C67 40 64 43 62 46" strokeWidth="1.6" opacity="0.8" />
-
-        {/* Wrist bands / cuffs */}
-        <path d="M42 92 C50 94 70 94 78 92" strokeWidth="2.5" />
-        <path d="M44 97 C50 99 70 99 76 97" strokeWidth="2" opacity="0.75" />
+      {/* Radiant Sunburst Rays */}
+      <g stroke="#EE7F1A" strokeWidth="2.2" strokeLinecap="round">
+        <line x1="50" y1="3" x2="50" y2="8" />
+        <line x1="31" y1="8" x2="34" y2="13" />
+        <line x1="69" y1="8" x2="66" y2="13" />
+        <line x1="18" y1="20" x2="23" y2="24" />
+        <line x1="82" y1="20" x2="77" y2="24" />
+        <line x1="12" y1="38" x2="18" y2="40" />
+        <line x1="88" y1="38" x2="82" y2="40" />
       </g>
 
-      {/* Traditional "नमस्ते" Typography */}
-      <text
-        x="60"
-        y="114"
-        textAnchor="middle"
-        fill={color}
-        fontSize="13"
-        fontWeight="800"
-        fontFamily="inherit"
-        letterSpacing="2"
-      >
-        नमस्ते
-      </text>
+      {/* Decorative Brand Sparkles */}
+      <path
+        d="M17 48 Q17 43 14 41 Q17 39 17 34 Q17 39 20 41 Q17 43 17 48 Z"
+        fill="#EE7F1A"
+      />
+      <path
+        d="M83 48 Q83 43 80 41 Q83 39 83 34 Q83 39 86 41 Q83 43 83 48 Z"
+        fill="#EE7F1A"
+      />
 
-      <text
-        x="60"
-        y="126"
-        textAnchor="middle"
-        fill={color}
-        fontSize="7.5"
-        fontWeight="800"
-        letterSpacing="2"
-        opacity="0.85"
-      >
-        SWAGATAM
-      </text>
+      {/* Shadow Base beneath Wrists */}
+      <ellipse cx="50" cy="74" rx="16" ry="3.5" fill="#211712" opacity="0.12" />
+
+      {/* Left Hand Solid Silhouette */}
+      <path
+        d="M50 15 C46.5 17.5 37.5 29 34.5 44 C32.5 52 32.5 60 35.5 67 L50 71 Z"
+        fill="#FFFFFF"
+      />
+
+      {/* Right Hand Solid Silhouette */}
+      <path
+        d="M50 15 C53.5 17.5 62.5 29 65.5 44 C67.5 52 67.5 60 64.5 67 L50 71 Z"
+        fill="#FFFFFF"
+      />
+
+      {/* Outlined Folded Hands (Anjali Mudra / Namaste) */}
+      <g stroke="#211712" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+        {/* Left Hand Outer Edge */}
+        <path d="M50 15 C46.5 17.5 37.5 29 34.5 44 C32.5 52 32.5 60 35.5 67" />
+
+        {/* Right Hand Outer Edge */}
+        <path d="M50 15 C53.5 17.5 62.5 29 65.5 44 C67.5 52 67.5 60 64.5 67" />
+
+        {/* Center Seam dividing the two palms */}
+        <path d="M50 15 L50 71" strokeWidth="2.2" />
+
+        {/* Folded Thumbs */}
+        <path
+          d="M34.5 51 C37 48 42 48 45.5 52 C47.5 55 46.5 62 46.5 64"
+          fill="#FFF6EC"
+          strokeWidth="2.2"
+        />
+        <path
+          d="M65.5 51 C63 48 58 48 54.5 52 C52.5 55 53.5 62 53.5 64"
+          fill="#FFF6EC"
+          strokeWidth="2.2"
+        />
+
+        {/* Finger Creases (Left) */}
+        <path d="M37.5 39 C40.5 39 44.5 42 46.5 45" strokeWidth="1.6" opacity="0.8" />
+        <path d="M40.5 30 C43.5 31 46.5 34 47.5 37" strokeWidth="1.6" opacity="0.8" />
+
+        {/* Finger Creases (Right) */}
+        <path d="M62.5 39 C59.5 39 55.5 42 53.5 45" strokeWidth="1.6" opacity="0.8" />
+        <path d="M59.5 30 C56.5 31 53.5 34 52.5 37" strokeWidth="1.6" opacity="0.8" />
+
+        {/* Wrist Bangles / Sacred Kalava */}
+        <path
+          d="M34.5 67 C39.5 70 60.5 70 65.5 67 L65.5 72 C60.5 75 39.5 75 34.5 72 Z"
+          fill="#EE7F1A"
+          stroke="#211712"
+          strokeWidth="2.2"
+        />
+        <path
+          d="M35.5 73 C40.5 76 59.5 76 64.5 73 L64.5 76 C59.5 79 40.5 79 35.5 76 Z"
+          fill="#211712"
+          stroke="#211712"
+          strokeWidth="1.8"
+        />
+      </g>
+
+      {/* Chunky Sticker Pill Badge: नमस्ते */}
+      <g filter="drop-shadow(2.5px 2.5px 0px #211712)">
+        <rect
+          x="19"
+          y="81"
+          width="62"
+          height="18"
+          rx="9"
+          fill="#EE7F1A"
+          stroke="#211712"
+          strokeWidth="2.2"
+        />
+        <text
+          x="50"
+          y="93.8"
+          textAnchor="middle"
+          fill="#FFFFFF"
+          fontSize="10"
+          fontWeight="800"
+          fontFamily="system-ui, -apple-system, sans-serif"
+          letterSpacing="1.2"
+        >
+          नमस्ते 🙏
+        </text>
+      </g>
     </svg>
   );
 }
