@@ -493,8 +493,11 @@ section {
   overflow: hidden;
 }
 .hero-blob-namaste {
-  width: 230px;
-  height: 230px;
+  width: 250px;
+  height: 250px;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 16px rgba(33, 23, 18, 0.15));
   transition: transform 0.3s ease;
 }
 @media (max-width: 640px) {
@@ -507,8 +510,8 @@ section {
     transform: translate(-50%, -50%);
   }
   .hero-blob-namaste {
-    width: 155px;
-    height: 155px;
+    width: 170px;
+    height: 170px;
   }
 }
 .hero-food-burger {
